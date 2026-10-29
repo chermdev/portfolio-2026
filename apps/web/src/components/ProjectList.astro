@@ -1,11 +1,21 @@
 ---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import { ArrowUpRight } from 'lucide-react';
 import { projects } from '@portfolio/site/lib/site';
-interface Props { limit?: number }
-const { limit } = Astro.props;
+interface Props { featured?: boolean }
+const { featured = false } = Astro.props;
+const screenshots = import.meta.glob<{ default: ImageMetadata }>('../assets/projects/*.png', { eager: true });
+const screenshot = (key: string) => screenshots[`../assets/projects/${key}.png`].default;
+const visual = projects.filter(project => 'image' in project);
+const rows = projects.filter(project => !('image' in project));
 ---
-<ul class="border-b">{projects.slice(0, limit).map(project => <li><a href={project.href} class="group grid gap-x-8 gap-y-2 border-t py-6 sm:grid-cols-[minmax(0,16rem)_1fr_auto] sm:items-baseline">
+{featured ? <ul class="grid gap-x-8 gap-y-12 md:grid-cols-2">{visual.map(project => <li><a href={project.href} class="group block">
+  <div class="overflow-hidden rounded-2xl border bg-muted"><Image src={screenshot(project.image)} alt={`Screenshot of ${project.name}`} widths={[640, 960, 1280]} sizes="(min-width: 768px) 50vw, 100vw" class="aspect-[16/10] w-full object-cover object-top" /></div>
+  <div class="mt-5 flex items-start justify-between gap-4"><div><h3 class="text-lg font-medium tracking-tight group-hover:underline group-hover:underline-offset-4">{project.name}</h3><p class="mt-2 text-sm leading-6 text-muted-foreground">{project.description}</p><p class="meta mt-3 flex flex-wrap gap-x-3"><span>{project.kind}</span><span aria-hidden="true">·</span><span>{project.stack}</span><span aria-hidden="true">·</span><span>{project.domain}</span></p></div><ArrowUpRight aria-hidden="true" className="mt-1 shrink-0" size={18} strokeWidth={1.5} /></div>
+</a></li>)}</ul>
+: <ul class="border-b">{rows.map(project => <li><a href={project.href} class="group grid gap-x-8 gap-y-2 border-t py-6 sm:grid-cols-[minmax(0,16rem)_1fr_auto] sm:items-baseline">
   <span class="font-mono text-sm font-medium group-hover:underline group-hover:underline-offset-4">{project.name}</span>
   <span class="text-sm leading-6 text-muted-foreground">{project.description}</span>
   <span class="meta flex items-center gap-3"><span>{project.kind}</span><span aria-hidden="true">·</span><span>{project.stack}</span><ArrowUpRight aria-hidden="true" size={16} strokeWidth={1.5} /></span>
-</a></li>)}</ul>
+</a></li>)}</ul>}

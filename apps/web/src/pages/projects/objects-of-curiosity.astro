@@ -1,8 +1,0 @@
----
-import { localeFromPath } from '@portfolio/i18n';
-import { ArrowLeft } from 'lucide-react';
-import Layout from '@portfolio/site/layouts/Layout.astro';
-import Sculpture from '../../components/Sculpture.astro';
-import MaterialPicker from '../../components/MaterialPicker';
----
-<Layout title="Objects of curiosity — an interactive Three.js study" image="projects"><section class="page-shell section"><a href="/projects" class="text-link mb-8"><ArrowLeft aria-hidden="true" size={16} strokeWidth={1.5} /> All projects</a><div class="grid items-center gap-6 md:grid-cols-2"><div><h1 class="section-heading">Objects of curiosity.</h1><p class="lead mt-6">A continuous ribbon. A little light. An invitation to slow down and look.</p><p class="mt-5 text-sm leading-7 text-muted-foreground">Move your pointer over the sculpture to explore its reflections. Try a different material to see the same geometry in a new way.</p><MaterialPicker locale={localeFromPath(Astro.url.pathname)} /><p class="mt-4 text-xs text-muted-foreground">A still image is shown when reduced motion is enabled or WebGL is unavailable.</p></div><Sculpture interactive /></div><div class="mt-10 grid gap-6 border-t pt-8 sm:grid-cols-3"><div><p class="text-sm text-muted-foreground">Built with</p><p class="mt-2">Three.js & GSAP</p></div><div><p class="text-sm text-muted-foreground">Geometry</p><p class="mt-2">A (2, 3) torus knot</p></div><div><p class="text-sm text-muted-foreground">A study in</p><p class="mt-2">Form, light & interaction</p></div></div></section></Layout>

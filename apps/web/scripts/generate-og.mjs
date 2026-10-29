@@ -21,7 +21,7 @@ function textPaths(text, x, y, size, color, tracking = 0) {
   }).join('');
 }
 const cards = {
-  home: [['Hi, I’m', 'Charlie.'], 'Useful apps, test automation, bots, and AI.'],
+  home: [['Hi, I’m', 'Charlie.'], 'Websites, apps, automation, and AI.'],
   projects: [['Things I’ve', 'built.'], 'Apps, bots, crawlers, and experiments.'],
   tools: [['Free tools.', 'No uploads.'], 'Calculators today. Image and video compressors next.'],
   stripe: [['Know what', 'you keep.'], 'Stripe fees, in MXN and USD. Both directions.'],
@@ -32,7 +32,7 @@ const cards = {
   learn: [['Make room', 'for curiosity.'], 'Look inside the ideas behind the tools.'],
 };
 Object.assign(cards, {
-  'home-es': [['Hola, soy', 'Charlie.'], 'Apps útiles, automatización de pruebas, bots e IA.'],
+  'home-es': [['Hola, soy', 'Charlie.'], 'Webs, apps, automatización e IA.'],
   'projects-es': [['Cosas que he', 'construido.'], 'Apps, bots, crawlers y experimentos.'],
   'tools-es': [['Herramientas', 'gratuitas.'], 'Hoy calculadoras. Después, compresores de imagen y video.'],
   'stripe-es': [['Tus cobros.', 'Más claros.'], 'Comisiones de Stripe en MXN y USD.'],

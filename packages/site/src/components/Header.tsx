@@ -19,10 +19,12 @@ function HeaderContent({ pathname, portfolioBase = '' }: { pathname: string; not
     requestAnimationFrame(() => requestAnimationFrame(() => block.remove()));
     window.dispatchEvent(new Event('themechange'));
   }
-  const links = [{ href: `${portfolioBase}/projects`, label: t("Projects") }, { href: `${portfolioBase}/tools`, label: t("Tools") }, { href: `${portfolioBase}/#about`, label: t("About") }].map(link => ({ ...link, href: localizePath(link.href, locale) }));
+  const links = [{ href: `${portfolioBase}/`, label: t("Home") }, { href: `${portfolioBase}/#about`, label: t("About") }, { href: `${portfolioBase}/projects`, label: t("Projects") }, { href: `${portfolioBase}/tools`, label: t("Tools") }].map(link => ({ ...link, href: localizePath(link.href, locale) }));
+  // Home matches exactly; every other path also starts with "/".
+  const isCurrent = (href: string) => href.endsWith('/') ? pathname.replace(/\/$/, '') === href.replace(/\/$/, '') : pathname.startsWith(href);
   return <header className="page-shell relative z-20"><div className="flex h-24 items-center justify-between gap-6 border-b">
     <a href={localizePath(`${portfolioBase}/`, locale)} aria-label={t("chermdev home")} className="text-xl font-semibold tracking-tight">chermdev<span className="text-muted-foreground">.</span></a>
-    <nav aria-label={t("Main navigation")} className="hidden items-center rounded-full bg-muted/60 p-1 md:flex">{links.map(link => <a key={link.label} href={link.href} className="nav-link" aria-current={pathname.startsWith(link.href) ? 'page' : undefined}>{link.label}</a>)}</nav>
+    <nav aria-label={t("Main navigation")} className="hidden items-center rounded-full bg-muted/60 p-1 md:flex">{links.map(link => <a key={link.label} href={link.href} className="nav-link" aria-current={isCurrent(link.href) ? 'page' : undefined}>{link.label}</a>)}</nav>
     <div className="flex items-center gap-2 sm:gap-3">
       <a href={localizePath(pathname, locale === 'en' ? 'es' : 'en')} hrefLang={locale === 'en' ? 'es' : 'en'} lang={locale === 'en' ? 'es' : 'en'} aria-label={locale === 'en' ? 'Cambiar a español' : 'Switch to English'} className="text-link px-2">{locale === 'en' ? 'ES' : 'EN'}</a>
       <Button variant="ghost" size="icon" aria-label={t("Toggle light and dark theme")} onClick={toggleTheme}><span className="relative flex size-5 items-center justify-center"><Sun className="theme-icon theme-sun absolute" /><Moon className="theme-icon theme-moon absolute" /></span></Button>

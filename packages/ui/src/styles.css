@@ -28,8 +28,6 @@
   --input: #d4d4d4;
   --ring: #737373;
   --success: #44795a;
-  --stage: #ececf0;
-  --stage-end: #e1e2e8;
   --radius: 0.75rem;
   --chart-1: #677f70;
   --chart-2: #9c8bb8;
@@ -80,8 +78,6 @@
   --input: #404040;
   --ring: #a3a3a3;
   --success: #9ac7a5;
-  --stage: #252525;
-  --stage-end: #171717;
   --chart-1: #aac6b0;
   --chart-2: #beabd9;
   --chart-3: #9baec5;
@@ -116,7 +112,6 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-success: var(--success);
-  --color-stage: var(--stage);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -163,15 +158,9 @@
   .text-link { @apply inline-flex items-center gap-2 text-sm font-medium underline-offset-4 hover:underline; min-height: 2.75rem; }
   .display { font-size: var(--font-display); line-height: 1.015; letter-spacing: var(--tracking-display); font-weight: 500; }
   .hero-grid { display: grid; grid-template-columns: 1.15fr 1fr; align-items: center; min-height: 39rem; }
-  .hero-copy { position: relative; z-index: 1; padding-block: 4rem; }
-  .hero-art { position: relative; width: calc(100% + 5rem); margin-left: -3rem; aspect-ratio: 1; }
-  .hero-art canvas { width: 100%; height: 100%; position: absolute; inset: 0; }
-  .hero-art img { width: 100%; height: 100%; object-fit: contain; }
-  .hero-art[data-ready] img { visibility: hidden; }
-  .hero-art canvas { opacity: 0; transition: opacity 300ms var(--ease-out); }
-  .hero-art[data-ready] canvas { opacity: 1; }
-  .art-caption { @apply text-xs text-muted-foreground flex items-center gap-2; position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); white-space: nowrap; }
-  .project-visual { @apply rounded-2xl overflow-hidden relative; aspect-ratio: 1.4; background: linear-gradient(135deg, var(--stage), var(--stage-end)); }
+  .hero-copy { position: relative; z-index: 1; padding-block: 4rem; container-type: inline-size; }
+  /* Size the title to its column so a long word like "automatizaciones" fits without widening the grid. */
+  .hero-copy .display { font-size: min(var(--font-display), 12.5cqi); }
   /* Workbench labels: paths, stacks, and status read as monospace metadata. */
   .meta { @apply font-mono text-xs text-muted-foreground; letter-spacing: 0; }
   .tool-row { @apply flex items-center gap-5 py-7 border-t; }
@@ -203,8 +192,6 @@ html[data-input=keyboard] [data-slot=button]:active { transform: none !important
 @media (max-width: 767px) {
   .hero-grid { grid-template-columns: 1fr; min-height: auto; }
   .hero-copy { padding-block: 3rem 0; }
-  .hero-art { width: 100%; max-width: 30rem; margin: -1rem auto 1rem; }
-  .art-caption { bottom: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

@@ -1,14 +1,13 @@
 ---
 import { ArrowUpRight } from 'lucide-react';
 import Layout from '@portfolio/site/layouts/Layout.astro';
-import ProjectCards from '../../components/ProjectCards.astro';
 import ProjectList from '../../components/ProjectList.astro';
 import { site } from '@portfolio/site/lib/site';
 ---
-<Layout title="Projects" description="Apps, bots, crawlers, APIs, and web experiments by Charlie (chermdev)." image="projects"><section class="page-shell section">
+<Layout title="Projects" description="Websites, apps, bots, and automations by Charlie (chermdev)." image="projects"><section class="page-shell pt-12 pb-section">
   <p class="meta mb-5">Projects</p><h1 class="section-heading">Things I’ve built.</h1>
-  <p class="lead mt-6 mb-14">Small apps, bots, crawlers, and experiments. Most started with something I didn’t want to keep doing by hand.</p>
-  <h2 class="meta mb-4">On GitHub</h2><ProjectList />
-  <h2 class="meta mt-16 mb-6">On this site</h2><ProjectCards />
+  <p class="lead mt-6 mb-14">Websites, apps, and automations, each built to solve something concrete.</p>
+  <h2 class="meta mb-6">Websites and apps</h2><ProjectList featured />
+  <h2 class="meta mt-20 mb-4">Code and automation</h2><ProjectList />
   <div class="mt-16 border-t pt-8 flex flex-wrap justify-between gap-4"><p class="text-muted-foreground">Older experiments and forks live on GitHub too.</p><a class="text-link" href={site.github}>See everything on GitHub <ArrowUpRight aria-hidden="true" size={16} strokeWidth={1.5} /></a></div>
 </section></Layout>

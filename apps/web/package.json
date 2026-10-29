@@ -19,13 +19,11 @@
     "@portfolio/ui": "workspace:*",
     "@tailwindcss/vite": "4.3.3",
     "astro": "7.3.5",
-    "gsap": "3.15.0",
     "lucide-react": "1.48.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "recharts": "3.10.1",
     "tailwindcss": "4.3.3",
-    "three": "0.186.1",
     "zustand": "5.0.15"
   },
   "devDependencies": {
@@ -34,7 +32,6 @@
     "@napi-rs/wasm-runtime": "1.2.4",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "@types/three": "0.186.0",
     "fontkit": "2.0.4",
     "sharp": "0.35.4",
     "typescript": "6.0.3"

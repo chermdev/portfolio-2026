@@ -2,11 +2,12 @@
 import { localeFromPath, localizePath } from '@portfolio/i18n';
 import { ArrowUpRight } from 'lucide-react';
 import '@fontsource-variable/manrope/index.css';
+import manropeLatin from '@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?url';
 import '@portfolio/ui/styles.css';
 import Header from '../components/Header';
 import { site } from '../lib/site';
 interface Props { title?: string; description?: string; image?: string; noindex?: boolean; schema?: object; }
-const { title = 'Charlie, useful apps and automation', description = site.description, image = 'home', noindex = false, schema } = Astro.props;
+const { title = 'Charlie, websites, apps, and automations', description = site.description, image = 'home', noindex = false, schema } = Astro.props;
 const locale = localeFromPath(Astro.url.pathname);
 const englishPath = localizePath(Astro.url.pathname, 'en');
 const portfolioBase = import.meta.env.PUBLIC_PORTFOLIO_URL || (Astro.site?.hostname.startsWith('blog.') || Astro.site?.hostname.startsWith('learn.') || Astro.site?.hostname.startsWith('admin.') ? 'http://localhost:4321' : '');
@@ -20,6 +21,7 @@ const isConfigured = site.url !== 'https://portfolio.example';
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" href={manropeLatin} as="font" type="font/woff2" crossorigin />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{title} | chermdev</title>
     <meta name="description" content={description} />

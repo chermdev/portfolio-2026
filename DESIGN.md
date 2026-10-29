@@ -8,7 +8,7 @@ This is Charlie’s (chermdev) personal site: who he is, what he builds, and fre
 - `packages/ui/src/components/` owns the installed shadcn primitives. Import through `@portfolio/ui/components/*`.
 - `/system-design` is the live component reference. Add or update its examples whenever a reusable visual pattern changes.
 - Application pages compose these foundations using Tailwind. Do not add local color literals, arbitrary spacing, page-level style blocks, or duplicated CSS. If a value is missing, add a named token or a shared variant first.
-- Dynamic data visualization geometry, Three.js materials, animation transforms, and shadcn positioning variables are the exceptions: those values describe runtime geometry, not page styling.
+- Dynamic data visualization geometry, animation transforms, and shadcn positioning variables are the exceptions: those values describe runtime geometry, not page styling.
 
 ## Art direction
 
@@ -21,17 +21,17 @@ Layout concept:
 ```text
 desktop: [ identity     navigation     theme / contact ]
          [ who I am / actions      on-this-site index  ]
-         [ what I build: apps · automation · AI        ]
-         [ selected projects (repo list)               ]
+         [ about: heading + focus areas   story        ]
+         [ selected projects (screenshot cards)        ]
          [ tools intro            tools by category    ]
-         [ about                                       ]
+         [ contact                                     ]
 mobile:  [ identity                         menu/theme ]
          [ who I am / actions                         ]
          [ on-this-site index                         ]
-         [ build / projects / tools / about, stacked  ]
+         [ about / projects / tools / contact, stacked ]
 ```
 
-All content aligns to `.page-shell`. Section spacing uses `.section`, `py-section`, or `pt-section`. The global max width, gutters, text scales, and radius are CSS variables exposed through Tailwind. Tailwind's shared spacing scale handles gaps, padding, and margins; do not invent per-page pixel values. The chrome torus knot is a project (Objects of curiosity) and the OG image mark, not the home hero. Avoid decorative gradients or motion in other sections. Gradients are reserved for the material-study stage.
+All content aligns to `.page-shell`. Section spacing uses `.section`, `py-section`, or `pt-section`. The global max width, gutters, text scales, and radius are CSS variables exposed through Tailwind. Tailwind's shared spacing scale handles gaps, padding, and margins; do not invent per-page pixel values. Inner page headers (`/tools`, `/projects`, tool pages) start with `pt-12 pb-section`; `.section` spacing is for the sections below them. The chrome torus knot still (`/sculpture.png`) is only the OG image mark. Avoid decorative gradients and motion.
 
 ## Components
 
@@ -46,17 +46,17 @@ All content aligns to `.page-shell`. Section spacing uses `.section`, `py-sectio
 
 ## Motion and accessibility
 
-- GSAP is used only for the sculpture introduction. Page content renders without entrance animation. Keep ordinary controls instant or within 150ms.
+- Page content renders without entrance animation. Keep ordinary controls instant or within 150ms.
 - CSS transitions name exact properties. Never use `transition-all`.
 - Press feedback is `scale(0.96)` with a 150ms ease-out transition. Use Button's `static` prop where movement distracts.
 - Theme icons crossfade between opacity 0/1, scale 0.25/1, and blur 4px/0 using `cubic-bezier(0.2, 0, 0, 1)`. Suppress page transitions during the theme swap.
-- Respect reduced motion. Show the actual sculpture still instead of starting WebGL; stop motion if the preference changes. Pause rendering when hidden/offscreen and offer an explicit pause button.
+- Respect reduced motion; stop any motion if the preference changes.
 - Preserve visible focus, keyboard operation, logical heading order, and 44px primary touch targets. Do not animate keyboard-initiated feedback.
 - Test desktop and narrow mobile in both themes. No horizontal page overflow; scrollable data tables are allowed.
 
 ## Content and sharing
 
-Keep interface copy direct and specific. Do not invent client projects, testimonials, performance metrics, biography, or contact details. Public identity is “Charlie” / chermdev; do not publish his full name, employer, client, or city. GitHub and LinkedIn are the confirmed public contacts. Projects come from his public GitHub repositories. Planned tools may be listed as “Coming soon” and must move to the real tool list when they ship.
+Keep interface copy direct and specific. Do not invent client projects, testimonials, performance metrics, biography, or contact details. Public identity is “Charlie” / chermdev; do not publish his full name, employer, or city. GitHub and LinkedIn are the confirmed public contacts. Projects are the ones he lists, including client websites he chose to show; describe what each site does, not the client’s location. Websites and apps get a desktop screenshot in `apps/web/src/assets/projects` (1440×900, captured after load animations finish); repositories without an interface stay as rows. Planned tools may be listed as “Coming soon” and must move to the real tool list when they ship.
 
 Calculators must show editable assumptions, source dates, formula explanations, and limitations. Money uses tabular figures. Loan totals agree with the downloadable schedule. Never animate calculated numbers.
 
