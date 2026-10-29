@@ -9,6 +9,7 @@ export function feeDefaults(currency: Currency, plan: RadarPlan): Draft {
 }
 export const stripeDefaults = () => ({ currency: 'MXN' as Currency, plan: 'lite' as RadarPlan, draft: feeDefaults('MXN', 'lite'), international: false, conversion: false, mode: 'charge', amount: '1000' });
 export const loanDefaults = (home: boolean) => ({ mode: 'payment' as 'payment' | 'power', price: home ? '2500000' : '450000', budget: home ? '20000' : '8000', currency: 'MXN', down: '20', downType: 'percent' as 'percent' | 'cash', tradeIn: '0', rate: home ? '10.5' : '12', months: home ? '240' : '60', showSchedule: false, deposits: [] as { id: number; month: string; amount: string }[], strategy: 'term' as 'term' | 'payment' });
+export const savingsDefaults = () => ({ currency: 'MXN', initial: '10000', monthly: '2000', rate: '10', years: '10', compounding: '12' as '1' | '12' | '365', showTable: false });
 type Update<T> = T | ((previous: T) => T);
 // Persist inputs only. Derived results are recomputed; each tool has its own key.
 function calculatorStore<T extends object>(name: string, defaults: () => T) {
@@ -37,7 +38,7 @@ function calculatorStore<T extends object>(name: string, defaults: () => T) {
         }
       }
       const selections = saved as Record<string, unknown>;
-      const choices: Record<string, string[]> = { currency: ['MXN', 'USD'], plan: ['lite', 'standard', 'plus', 'pro'], mode: name.includes('stripe') ? ['charge', 'receive'] : ['payment', 'power'], downType: ['percent', 'cash'], strategy: ['term', 'payment'] };
+      const choices: Record<string, string[]> = { currency: ['MXN', 'USD'], plan: ['lite', 'standard', 'plus', 'pro'], mode: name.includes('stripe') ? ['charge', 'receive'] : ['payment', 'power'], downType: ['percent', 'cash'], strategy: ['term', 'payment'], compounding: ['1', '12', '365'] };
       for (const [key, allowed] of Object.entries(choices)) if (key in base && !allowed.includes(String(selections[key]))) return current;
       const deposits = (saved as { deposits?: unknown[] }).deposits;
       if (deposits?.some(item => !item || typeof item !== 'object' || typeof (item as {id?:unknown}).id !== 'number' || typeof (item as {month?:unknown}).month !== 'string' || typeof (item as {amount?:unknown}).amount !== 'string')) return current;
@@ -48,6 +49,7 @@ function calculatorStore<T extends object>(name: string, defaults: () => T) {
 export const useStripeStore = calculatorStore('chermdev:calculator:stripe:v1', stripeDefaults);
 export const useAutoStore = calculatorStore('chermdev:calculator:auto:v1', () => loanDefaults(false));
 export const useMortgageStore = calculatorStore('chermdev:calculator:mortgage:v1', () => loanDefaults(true));
-export function useHydrateCalculator(store: typeof useAutoStore | typeof useStripeStore) {
+export const useSavingsStore = calculatorStore('chermdev:calculator:savings:v1', savingsDefaults);
+export function useHydrateCalculator(store: typeof useAutoStore | typeof useStripeStore | typeof useSavingsStore) {
   useEffect(() => { void store.persist.rehydrate(); }, [store]);
 }

@@ -121,3 +121,28 @@ export function amortization(principal: number, annualRate: number, months: numb
   }
   return rows;
 }
+export type Compounding = 1 | 12 | 365;
+/** Month-by-month savings balance with end-of-month contributions. */
+export function savingsGrowth(input: { initial: number; monthly: number; annualRate: number; years: number; compounding: Compounding }) {
+  const { initial, monthly, annualRate, years, compounding } = input;
+  finiteRange(initial, 0, 1e9, 'Initial deposit');
+  finiteRange(monthly, 0, 1e9, 'Monthly contribution');
+  finiteRange(annualRate, 0, 100, 'Annual interest');
+  if (!Number.isInteger(years) || years < 1 || years > 60) throw new Error('Years must be 1–60 whole years.');
+  if (![1, 12, 365].includes(compounding)) throw new Error('Choose a valid compounding frequency.');
+  // Equivalent monthly rate for the chosen compounding, so contributions can stay monthly.
+  const rate = Math.expm1(compounding / 12 * Math.log1p(annualRate / 100 / compounding));
+  const deposit = roundMoney(monthly);
+  // Accrue unrounded so cent rounding never compounds; rounded rows still reconcile exactly.
+  let exact = roundMoney(initial);
+  const rows: { month: number; contribution: number; interest: number; balance: number }[] = [];
+  for (let month = 1; month <= years * 12; month++) {
+    const previous = roundMoney(exact);
+    exact = exact * (1 + rate) + deposit;
+    const balance = roundMoney(exact);
+    // Doubles lose cent precision long before Infinity; refuse figures that would look exact but are not.
+    if (balance > 1e12) throw new Error('The balance exceeds 1 trillion, where cent precision is lost. Shorten the term or lower the rate.');
+    rows.push({ month, contribution: deposit, interest: roundMoney(balance - previous - deposit), balance });
+  }
+  return rows;
+}

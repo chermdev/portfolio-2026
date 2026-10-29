@@ -8,4 +8,5 @@ export const tools = [
   { slug: 'stripe-calculator', name: 'Stripe fee calculator', description: 'Know what you keep. Work forwards or backwards, in MXN or USD.', tag: 'Payments', icon: 'stripe' },
   { slug: 'auto-loan-calculator', name: 'Auto loan calculator', description: 'Find your monthly payment, or the car that fits your budget.', tag: 'Auto finance', icon: 'car' },
   { slug: 'mortgage-calculator', name: 'Mortgage calculator', description: 'Explore your monthly payment and how much home you can afford.', tag: 'Home finance', icon: 'home' },
+  { slug: 'compound-interest-calculator', name: 'Compound interest calculator', description: 'See how your savings could grow with regular contributions.', tag: 'Savings', icon: 'savings' },
 ] as const;

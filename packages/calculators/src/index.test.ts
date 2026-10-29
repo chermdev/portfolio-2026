@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stripeFees, grossForNet, monthlyPayment, purchasingPrincipal, loanScenario, amortization, stripePresets } from './index.ts';
+import { stripeFees, grossForNet, monthlyPayment, purchasingPrincipal, loanScenario, amortization, stripePresets, savingsGrowth } from './index.ts';
 test('Mexico processing fee with 16% fee tax', () => {
   assert.deepEqual(stripeFees(1000, { percent: 3.6, fixed: 3, radar: 0, international: 0, conversion: 0, tax: 16, extra: 0 }),
     { gross: 1000, processing: 39, radar: 0, extra: 0, tax: 6.24, fee: 45.24, net: 954.76 });
@@ -114,4 +114,30 @@ test('independent interest-bearing deposit example matches both strategies', () 
     assert.equal(Math.round(rows.reduce((sum, row) => sum + row.interest, 0) * 100), strategy === 'term' ? 57529 : 67224);
     if (strategy === 'payment') assert.equal(rows[1].payment, 873.28);
   }
+});
+
+test('savings growth matches closed-form compound interest and reconciles to the cent', () => {
+  // Monthly compounding: FV = P(1+i)^n + PMT((1+i)^n − 1)/i, i = 6%/12, n = 120.
+  const rows = savingsGrowth({ initial: 10000, monthly: 500, annualRate: 6, years: 10, compounding: 12 });
+  const growth = 1.005 ** 120;
+  assert.equal(rows.length, 120);
+  assert.ok(Math.abs(rows.at(-1)!.balance - (10000 * growth + 500 * (growth - 1) / 0.005)) < 0.5);
+  const deposits = 10000 + rows.reduce((sum, row) => sum + row.contribution, 0);
+  const interest = rows.reduce((sum, row) => sum + row.interest, 0);
+  assert.equal(Math.round((deposits + interest) * 100), Math.round(rows.at(-1)!.balance * 100));
+});
+test('savings compounding frequencies use equivalent annual yields', () => {
+  const yearly = (compounding: 1 | 12 | 365) => savingsGrowth({ initial: 100000, monthly: 0, annualRate: 10, years: 1, compounding }).at(-1)!.balance;
+  assert.equal(yearly(1), 110000);
+  assert.ok(Math.abs(yearly(12) - 100000 * (1 + 0.1 / 12) ** 12) < 0.05);
+  assert.ok(Math.abs(yearly(365) - 100000 * (1 + 0.1 / 365) ** 365) < 0.05);
+  assert.equal(savingsGrowth({ initial: 0, monthly: 100, annualRate: 0, years: 2, compounding: 12 }).at(-1)!.balance, 2400);
+});
+test('savings validation rejects invalid states', () => {
+  const base = { initial: 1000, monthly: 100, annualRate: 5, years: 5, compounding: 12 as const };
+  for (const years of [0, 61, 1.5, NaN]) assert.throws(() => savingsGrowth({ ...base, years }));
+  for (const annualRate of [-1, 101, NaN]) assert.throws(() => savingsGrowth({ ...base, annualRate }));
+  assert.throws(() => savingsGrowth({ ...base, monthly: -1 }));
+  assert.throws(() => savingsGrowth({ ...base, compounding: 4 as 12 }));
+  assert.throws(() => savingsGrowth({ initial: 1000, monthly: 0, annualRate: 100, years: 60, compounding: 12 }), /1 trillion/);
 });

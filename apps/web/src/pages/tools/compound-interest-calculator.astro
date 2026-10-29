@@ -1,0 +1,9 @@
+---
+import { localeFromPath } from '@portfolio/i18n';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import SavingsCalculator from '../../components/calculators/SavingsCalculator';
+---
+<ToolLayout title="Compound interest calculator" description="Simulate your savings. See how an initial deposit and monthly contributions could grow with compound interest." category="Savings" image="savings">
+  <SavingsCalculator locale={localeFromPath(Astro.url.pathname)} client:load />
+  <div slot="guide" class="grid gap-10 md:grid-cols-2"><div class="prose-copy"><h2>How does compound interest work?</h2><p>Interest is added to your balance, and the next period earns interest on that larger balance. Over long periods, the interest earned can exceed what you contributed. Time and consistency usually matter more than the exact rate.</p><h2>Which rate should I use?</h2><p>The 10% annual rate is an illustrative default, not a market rate. Enter the nominal annual rate your account or instrument quotes. If it only publishes an effective yield, such as GAT Nominal (not GAT Real), choose annual compounding so that yield is applied as entered.</p></div><div class="prose-copy"><h2>How is it calculated?</h2><p>The annual rate r compounded n times a year becomes an equivalent monthly rate i = (1 + r ÷ n)^(n ÷ 12) − 1. Each month, the balance grows by i and the monthly contribution is added at the end of the month. Values are rounded to cents for display; the balance accrues unrounded. Annual and daily compounding are smoothed into this monthly rate; your institution may credit interest differently within the year.</p><h2>What is not included?</h2><p>The estimate excludes taxes on interest, inflation, account fees, withdrawals, rate changes, and investment risk. Real returns after inflation can be much lower than the nominal balance suggests. This is a simulation, not financial advice.</p></div></div>
+</ToolLayout>

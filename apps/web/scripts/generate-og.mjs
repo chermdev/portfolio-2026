@@ -27,6 +27,7 @@ const cards = {
   stripe: [['Know what', 'you keep.'], 'Stripe fees, in MXN and USD. Both directions.'],
   auto: [['Your next car.', 'Your numbers.'], 'Monthly payments and purchasing power.'],
   mortgage: [['Put a home', 'in perspective.'], 'A clear, flexible mortgage calculator.'],
+  savings: [['Watch your', 'savings grow.'], 'A compound interest calculator for regular savers.'],
   notes: [['Notes from', 'the workbench.'], 'Thoughts on building things for the web.'],
   learn: [['Make room', 'for curiosity.'], 'Look inside the ideas behind the tools.'],
 };
@@ -37,6 +38,7 @@ Object.assign(cards, {
   'stripe-es': [['Tus cobros.', 'Más claros.'], 'Comisiones de Stripe en MXN y USD.'],
   'auto-es': [['Tu próximo', 'auto.'], 'Mensualidades y capacidad de compra.'],
   'mortgage-es': [['Tu próxima', 'casa.'], 'Un simulador hipotecario claro y flexible.'],
+  'savings-es': [['Haz crecer', 'tus ahorros.'], 'Un simulador de interés compuesto para ahorrar.'],
   'notes-es': [['Notas del', 'taller.'], 'Ideas sobre crear cosas para la web.'],
   'learn-es': [['Espacio para', 'la curiosidad.'], 'Descubre las ideas detrás de las herramientas.'],
 });

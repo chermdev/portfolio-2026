@@ -31,3 +31,7 @@ test('static localization translates metadata/noscript but leaves React islands 
  assert.ok(result.includes('const x = "Monthly payment"'));
  assert.ok(result.includes('"name":"Simulador de crédito hipotecario"'));
 });
+test('savings calculator validation is translated', () => {
+ assert.equal(translate('Monthly contribution must be between 0 and 1000000000.', 'es'), 'Aportación mensual debe estar entre 0 y 1000000000.');
+ assert.equal(translate('Your balance after {years} years', 'es', {years: 10}), 'Tu saldo después de 10 años');
+});
