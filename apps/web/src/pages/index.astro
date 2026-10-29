@@ -1,28 +1,63 @@
 ---
 import Layout from '@portfolio/site/layouts/Layout.astro';
-import Sculpture from '../components/Sculpture.astro';
 import ToolList from '../components/ToolList.astro';
-import ProjectCards from '../components/ProjectCards.astro';
+import ProjectList from '../components/ProjectList.astro';
 import { buttonVariants } from '@portfolio/ui/components/button';
-import { ArrowDown, ArrowUpRight, ArrowRight, Code2, Sprout } from 'lucide-react';
-import { site, destinations } from '@portfolio/site/lib/site';
+import { ArrowUpRight, ArrowRight, AppWindow, Bot, Sparkles } from 'lucide-react';
+import { site } from '@portfolio/site/lib/site';
+import { localeFromPath, localizePath } from '@portfolio/i18n';
+const locale = localeFromPath(Astro.url.pathname);
+const index = [
+  { path: '/tools', title: 'Free tools', description: 'Calculators that run in your browser. Image and video compressors are next.' },
+  { path: '/projects', title: 'Projects', description: 'Bots, crawlers, APIs, and web experiments.' },
+  { path: '/#about', title: 'About', description: 'Who I am and how I like to work.' },
+];
+const interests = [
+  { icon: AppWindow, title: 'Useful apps', description: 'Tools that solve one problem clearly, with the assumptions in plain sight. The calculators here are an example.' },
+  { icon: Bot, title: 'Automation and testing', description: 'Test suites, crawlers, and workflows that check, collect, or click so nobody has to. Playwright, TypeScript, Python, and n8n.' },
+  { icon: Sparkles, title: 'Applied AI', description: 'Agents, MCP servers, and skills that take repetitive engineering work off the table, from writing tests to analyzing failures.' },
+];
 ---
-<Layout schema={{ '@context': 'https://schema.org', '@type': 'Person', name: 'chermdev', url: site.url, sameAs: [site.github] }}>
+<Layout schema={{ '@context': 'https://schema.org', '@type': 'Person', name: 'Charlie', alternateName: 'chermdev', url: site.url, sameAs: [site.github, site.linkedin] }}>
   <section class="page-shell">
-    <div class="hero-grid"><div class="hero-copy">
-      <p class="mb-7 flex items-center gap-3 text-sm text-muted-foreground" data-enter><span class="size-2 rounded-full bg-success"></span>Developer. Builder. Curious human.</p>
-      <h1 class="display" data-enter>Thoughtful code.<br />Useful things.</h1>
-      <p class="lead mt-7 max-w-sm" data-enter>I’m chermdev. I turn ideas into things you can use, explore, and sometimes just play with.</p>
-      <div class="mt-9 flex flex-wrap items-center gap-4" data-enter><a class={buttonVariants({size: "lg"})} href="/projects">Explore my work <ArrowUpRight data-icon="inline-end" /></a><a class={buttonVariants({size: "lg", variant: "ghost"})} href="/tools">Try the tools <ArrowRight data-icon="inline-end" /></a></div>
-    </div><Sculpture /></div>
-    <div class="flex flex-wrap items-center justify-between gap-4 border-b py-7 text-xs text-muted-foreground"><span class="flex items-center gap-2"><Code2 size={15} strokeWidth={1.5} /> At the intersection of design & engineering</span><span class="hidden sm:block">An independent corner of the web</span><a href="#selected" class="flex min-h-10 items-center gap-3">A little further down <ArrowDown size={15} strokeWidth={1.5} /></a></div>
+    <div class="hero-grid gap-12">
+      <div class="hero-copy">
+        <p class="meta mb-7 flex items-center gap-3"><span class="size-2 rounded-full bg-success"></span>Charlie · chermdev</p>
+        <h1 class="display">I build useful apps and automate the rest.</h1>
+        <p class="lead mt-7 max-w-lg">People know me as Charlie. I’m a QA automation engineer and a self-taught full-stack developer. I like software that is useful first and well made always, and I automate whatever repeats: tests, bots, workflows, and AI agents.</p>
+        <div class="mt-9 flex flex-wrap items-center gap-4"><a class={buttonVariants({size: "lg"})} href="/tools">Try the tools <ArrowRight data-icon="inline-end" /></a><a class={buttonVariants({size: "lg", variant: "ghost"})} href="/projects">See projects <ArrowUpRight data-icon="inline-end" /></a></div>
+      </div>
+      <nav aria-label="On this site" class="rounded-2xl border bg-card p-2">
+        <p class="meta px-5 pt-4 pb-2">On this site</p>
+        {index.map(item => <a href={item.path} class="group grid gap-1 rounded-xl px-5 py-4 transition-colors duration-150 hover:bg-secondary"><span class="meta">{localizePath(item.path, locale)}</span><span class="flex items-center justify-between gap-4 font-medium">{item.title}<ArrowUpRight aria-hidden="true" size={16} strokeWidth={1.5} /></span><span class="text-sm leading-6 text-muted-foreground">{item.description}</span></a>)}
+        <div class="grid gap-1 px-5 py-4 text-muted-foreground"><span class="meta">later</span><span class="font-medium">Blog and courses</span><span class="text-sm leading-6">Notes and video lessons, once there’s enough worth sharing.</span></div>
+      </nav>
+    </div>
   </section>
-  <section id="selected" class="page-shell section"><div class="mb-10 flex flex-wrap items-end justify-between gap-6"><div><p class="mb-4 text-sm text-muted-foreground">Built with intention</p><h2 class="section-heading">Ideas, made real.</h2></div><a class="text-link" href="/projects">All projects <ArrowUpRight size={16} /></a></div><ProjectCards /></section>
-  <section class="page-shell pb-section"><div class="grid gap-10 border-t pt-section lg:grid-cols-3"><div><p class="mb-4 text-sm text-muted-foreground">Small tools. Real utility.</p><h2 class="section-heading">Less guesswork.<br />More clarity.</h2><p class="lead mt-5">A growing collection of free tools for the decisions that deserve a little math.</p><a class="text-link mt-6" href="/tools">Explore the toolbox <ArrowUpRight size={16} /></a></div><div class="lg:col-span-2"><ToolList /></div></div></section>
-  <section id="about" class="bg-secondary/50"><div class="page-shell section grid gap-10 md:grid-cols-2"><div><Sprout size={32} strokeWidth={1.5} className="mb-6 text-secondary-foreground" /><h2 class="section-heading">Always building.<br />Always learning.</h2></div><div class="flex flex-col items-start gap-6 pt-2"><p class="lead">I like understanding how things work—and finding ways to make them work a little better.</p><p class="lead">This is my space to build useful software, experiment with new ideas, and share what I learn along the way. Some things are polished. Others are happily in progress.</p><div class="flex flex-wrap gap-6"><a href={site.github} class="text-link">Find me on GitHub <ArrowUpRight size={16} /></a><a href={destinations.learn} class="text-link">Learn with me <ArrowUpRight size={16} /></a></div></div></div></section>
-  <section class="page-shell py-section flex flex-wrap items-center justify-between gap-8"><div><p class="text-muted-foreground mb-3">Good things start with a conversation.</p><h2 class="subheading">Have something in mind?</h2></div><a class={buttonVariants({size: "lg"})} href={site.github}>Let’s connect <ArrowUpRight data-icon="inline-end" /></a></section>
+  <section class="page-shell section border-t">
+    <p class="meta mb-4">What I build</p>
+    <h2 class="section-heading max-w-3xl">Software that does a job, then gets out of the way.</h2>
+    <div class="mt-12 grid gap-10 md:grid-cols-3">{interests.map(({ icon: Icon, ...item }) => <div><Icon size={24} strokeWidth={1.5} /><h3 class="mt-5 text-lg font-medium tracking-tight">{item.title}</h3><p class="mt-2 text-sm leading-7 text-muted-foreground">{item.description}</p></div>)}</div>
+  </section>
+  <section id="projects" class="page-shell pb-section">
+    <div class="mb-8 flex flex-wrap items-end justify-between gap-6"><div><p class="meta mb-4">Selected projects</p><h2 class="section-heading">Things I’ve built.</h2></div><a class="text-link" href="/projects">All projects <ArrowUpRight size={16} /></a></div>
+    <ProjectList limit={4} />
+  </section>
+  <section class="page-shell pb-section">
+    <div class="grid gap-10 border-t pt-section lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+      <div><p class="meta mb-4">Free tools</p><h2 class="subheading">Tools that run in your browser.</h2><p class="mt-5 text-muted-foreground leading-7">No sign-up, and your inputs stay on your device. Finance calculators today. Media tools are next.</p><a class="text-link mt-4" href="/tools">All tools <ArrowUpRight size={16} /></a></div>
+      <ToolList />
+    </div>
+  </section>
+  <section id="about" class="bg-secondary/50"><div class="page-shell section grid gap-10 md:grid-cols-2">
+    <div><p class="meta mb-4">About</p><h2 class="section-heading">Hi, I’m Charlie.</h2></div>
+    <div class="flex flex-col items-start gap-6 pt-2">
+      <p class="lead">I like understanding how things work, then making them work a little better. In software I care about two things: that it is actually useful, and that it is built with quality.</p>
+      <p class="lead">By day I build test automation with Playwright and TypeScript, more and more with AI agents in the loop. I think AI amplifies what you already know rather than replacing it, so I still want to understand how everything works.</p>
+      <p class="lead">Most of my side projects start with something repetitive: checking stock, verifying a serial number, painting pixel art one request at a time. If a script, a bot, or an AI agent can do it, I’ll probably build one.</p>
+      <p class="lead">I’m also saving for my dream pickup truck. The compound interest calculator helps.</p>
+      <div class="flex flex-wrap gap-6"><a href={site.github} class="text-link">GitHub <ArrowUpRight size={16} /></a><a href={site.linkedin} class="text-link">LinkedIn <ArrowUpRight size={16} /></a></div>
+    </div>
+  </div></section>
+  <section class="page-shell py-section flex flex-wrap items-center justify-between gap-8"><div><p class="meta mb-3">Contact</p><h2 class="subheading">Have something to automate?</h2></div><a class={buttonVariants({size: "lg"})} href={site.linkedin}>Message me on LinkedIn <ArrowUpRight data-icon="inline-end" /></a></section>
 </Layout>
-<script>
-  import { gsap } from 'gsap';
-  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) gsap.from('[data-enter]', { y: 16, opacity: 0, duration: 0.7, stagger: 0.1, ease: 'power3.out', clearProps: 'all' });
-</script>

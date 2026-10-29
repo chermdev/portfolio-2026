@@ -21,9 +21,9 @@ function textPaths(text, x, y, size, color, tracking = 0) {
   }).join('');
 }
 const cards = {
-  home: [['Thoughtful code.', 'Useful things.'], 'A developer’s space to build, explore, and share.'],
-  projects: [['Ideas,', 'made real.'], 'Projects and experiments by chermdev.'],
-  tools: [['Less guesswork.', 'More clarity.'], 'Free calculators for payments and bigger purchases.'],
+  home: [['Hi, I’m', 'Charlie.'], 'Useful apps, test automation, bots, and AI.'],
+  projects: [['Things I’ve', 'built.'], 'Apps, bots, crawlers, and experiments.'],
+  tools: [['Free tools.', 'No uploads.'], 'Calculators today. Image and video compressors next.'],
   stripe: [['Know what', 'you keep.'], 'Stripe fees, in MXN and USD. Both directions.'],
   auto: [['Your next car.', 'Your numbers.'], 'Monthly payments and purchasing power.'],
   mortgage: [['Put a home', 'in perspective.'], 'A clear, flexible mortgage calculator.'],
@@ -32,9 +32,9 @@ const cards = {
   learn: [['Make room', 'for curiosity.'], 'Look inside the ideas behind the tools.'],
 };
 Object.assign(cards, {
-  'home-es': [['Código con', 'intención.'], 'Un espacio para crear, explorar y compartir.'],
-  'projects-es': [['Ideas hechas', 'realidad.'], 'Proyectos y experimentos de chermdev.'],
-  'tools-es': [['Menos dudas.', 'Más claridad.'], 'Calculadoras gratuitas para tus decisiones.'],
+  'home-es': [['Hola, soy', 'Charlie.'], 'Apps útiles, automatización de pruebas, bots e IA.'],
+  'projects-es': [['Cosas que he', 'construido.'], 'Apps, bots, crawlers y experimentos.'],
+  'tools-es': [['Herramientas', 'gratuitas.'], 'Hoy calculadoras. Después, compresores de imagen y video.'],
   'stripe-es': [['Tus cobros.', 'Más claros.'], 'Comisiones de Stripe en MXN y USD.'],
   'auto-es': [['Tu próximo', 'auto.'], 'Mensualidades y capacidad de compra.'],
   'mortgage-es': [['Tu próxima', 'casa.'], 'Un simulador hipotecario claro y flexible.'],
@@ -46,7 +46,7 @@ const out = new URL('../public/og/', import.meta.url);
 await mkdir(out, { recursive: true });
 await mkdir(new URL('../artifacts/og/', import.meta.url), { recursive: true });
 for (const [name, [lines, description]] of Object.entries(cards)) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="${background}"/>${textPaths('chermdev.', 64, 84, 30, ink, -1)}<image x="645" y="38" width="585" height="585" xlink:href="data:image/png;base64,${sculpture}"/>${lines.map((line, i) => textPaths(line, 64, 280 + i * 91, 78, ink, -3.5)).join('')}${textPaths(description, 68, 468, 23, muted, -0.3)}<path d="M64 548H1136" stroke="${token('border')}"/>${textPaths(name.endsWith('-es') ? 'Herramientas, proyectos y un poco de curiosidad.' : 'Tools, projects & a little curiosity.', 68, 588, 18, muted)}</svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="${background}"/>${textPaths('chermdev.', 64, 84, 30, ink, -1)}<image x="645" y="38" width="585" height="585" xlink:href="data:image/png;base64,${sculpture}"/>${lines.map((line, i) => textPaths(line, 64, 280 + i * 91, 78, ink, -3.5)).join('')}${textPaths(description, 68, 468, 23, muted, -0.3)}<path d="M64 548H1136" stroke="${token('border')}"/>${textPaths(name.endsWith('-es') ? 'Charlie · herramientas, proyectos y automatización.' : 'Charlie · tools, projects, and automation.', 68, 588, 18, muted)}</svg>`;
   const source = new URL(`../artifacts/og/${name}.svg`, import.meta.url);
   await writeFile(source, svg);
   await sharp(Buffer.from(svg)).png().toFile(new URL(`${name}.png`, out).pathname);

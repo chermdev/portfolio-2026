@@ -1,0 +1,11 @@
+---
+import { ArrowUpRight } from 'lucide-react';
+import { projects } from '@portfolio/site/lib/site';
+interface Props { limit?: number }
+const { limit } = Astro.props;
+---
+<ul class="border-b">{projects.slice(0, limit).map(project => <li><a href={project.href} class="group grid gap-x-8 gap-y-2 border-t py-6 sm:grid-cols-[minmax(0,16rem)_1fr_auto] sm:items-baseline">
+  <span class="font-mono text-sm font-medium group-hover:underline group-hover:underline-offset-4">{project.name}</span>
+  <span class="text-sm leading-6 text-muted-foreground">{project.description}</span>
+  <span class="meta flex items-center gap-3"><span>{project.kind}</span><span aria-hidden="true">·</span><span>{project.stack}</span><ArrowUpRight aria-hidden="true" size={16} strokeWidth={1.5} /></span>
+</a></li>)}</ul>

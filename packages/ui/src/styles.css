@@ -172,6 +172,8 @@
   .hero-art[data-ready] canvas { opacity: 1; }
   .art-caption { @apply text-xs text-muted-foreground flex items-center gap-2; position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); white-space: nowrap; }
   .project-visual { @apply rounded-2xl overflow-hidden relative; aspect-ratio: 1.4; background: linear-gradient(135deg, var(--stage), var(--stage-end)); }
+  /* Workbench labels: paths, stacks, and status read as monospace metadata. */
+  .meta { @apply font-mono text-xs text-muted-foreground; letter-spacing: 0; }
   .tool-row { @apply flex items-center gap-5 py-7 border-t; }
   .tool-icon { @apply flex size-12 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground; }
   .tool-row:hover .tool-icon { @apply bg-accent text-accent-foreground; }

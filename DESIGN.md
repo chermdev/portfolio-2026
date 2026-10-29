@@ -1,6 +1,6 @@
 # chermdev design system
 
-The portfolio is a quiet workspace for useful software and curious experiments. Let the content and one sculptural object carry the personality; keep the surrounding interface precise and calm.
+This is Charlie’s (chermdev) personal site: who he is, what he builds, and free tools that run in the browser. It should read like a developer’s workbench: precise, calm, and specific. Every page should make clear in seconds who made it and what is here. Prefer concrete statements (a role, a stack, a real repo) over slogans.
 
 ## Source of truth
 
@@ -14,22 +14,24 @@ The portfolio is a quiet workspace for useful software and curious experiments. 
 
 Palette: white `#ffffff`, ink `#171717`, neutral surfaces `#f5f5f5`, lilac `#e9e5f1`. Dark backgrounds use near-black `#090909` with neutral charcoal surfaces. Dark mode remaps semantic roles in the same token file. Never use separate page-specific dark palettes.
 
-Manrope is the self-hosted variable typeface. Display text uses the shared fluid scale, medium weight, and deliberate line breaks. Body text has comfortable leading and stays under 68 characters where practical. Labels use sentence case; no decorative numbering or repeated uppercase eyebrows.
+Manrope is the self-hosted variable typeface. Display text uses the shared fluid scale, medium weight, and deliberate line breaks. Body text has comfortable leading and stays under 68 characters where practical. Metadata (paths, stacks, categories, status, section labels) uses `.meta`: the system monospace stack, small and muted. It is the workbench accent; do not use it for body copy. Labels use sentence case; no decorative numbering or repeated uppercase eyebrows.
 
 Layout concept:
 
 ```text
 desktop: [ identity     navigation     theme / contact ]
-         [ large statement       interactive sculpture ]
-         [ selected work         selected work         ]
-         [ tools introduction    useful tool list      ]
+         [ who I am / actions      on-this-site index  ]
+         [ what I build: apps · automation · AI        ]
+         [ selected projects (repo list)               ]
+         [ tools intro            tools by category    ]
+         [ about                                       ]
 mobile:  [ identity                         menu/theme ]
-         [ statement / actions                        ]
-         [ sculpture                                  ]
-         [ work / tools / about, stacked               ]
+         [ who I am / actions                         ]
+         [ on-this-site index                         ]
+         [ build / projects / tools / about, stacked  ]
 ```
 
-All content aligns to `.page-shell`. Section spacing uses `.section`, `py-section`, or `pt-section`. The global max width, gutters, text scales, and radius are CSS variables exposed through Tailwind. Tailwind's shared spacing scale handles gaps, padding, and margins; do not invent per-page pixel values. The memorable element is the chrome torus knot; avoid competing decorative gradients or motion in other sections. Gradients are reserved for the material-study stage.
+All content aligns to `.page-shell`. Section spacing uses `.section`, `py-section`, or `pt-section`. The global max width, gutters, text scales, and radius are CSS variables exposed through Tailwind. Tailwind's shared spacing scale handles gaps, padding, and margins; do not invent per-page pixel values. The chrome torus knot is a project (Objects of curiosity) and the OG image mark, not the home hero. Avoid decorative gradients or motion in other sections. Gradients are reserved for the material-study stage.
 
 ## Components
 
@@ -44,7 +46,7 @@ All content aligns to `.page-shell`. Section spacing uses `.section`, `py-sectio
 
 ## Motion and accessibility
 
-- GSAP is used for the one-time hero entrance and sculpture introduction. Keep ordinary controls instant or within 150ms.
+- GSAP is used only for the sculpture introduction. Page content renders without entrance animation. Keep ordinary controls instant or within 150ms.
 - CSS transitions name exact properties. Never use `transition-all`.
 - Press feedback is `scale(0.96)` with a 150ms ease-out transition. Use Button's `static` prop where movement distracts.
 - Theme icons crossfade between opacity 0/1, scale 0.25/1, and blur 4px/0 using `cubic-bezier(0.2, 0, 0, 1)`. Suppress page transitions during the theme swap.
@@ -54,7 +56,7 @@ All content aligns to `.page-shell`. Section spacing uses `.section`, `py-sectio
 
 ## Content and sharing
 
-Keep interface copy direct and specific. Do not invent client projects, testimonials, performance metrics, biography, or contact details. GitHub is the confirmed public contact.
+Keep interface copy direct and specific. Do not invent client projects, testimonials, performance metrics, biography, or contact details. Public identity is “Charlie” / chermdev; do not publish his full name, employer, client, or city. GitHub and LinkedIn are the confirmed public contacts. Projects come from his public GitHub repositories. Planned tools may be listed as “Coming soon” and must move to the real tool list when they ship.
 
 Calculators must show editable assumptions, source dates, formula explanations, and limitations. Money uses tabular figures. Loan totals agree with the downloadable schedule. Never animate calculated numbers.
 

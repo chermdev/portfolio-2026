@@ -6,7 +6,7 @@ import '@portfolio/ui/styles.css';
 import Header from '../components/Header';
 import { site } from '../lib/site';
 interface Props { title?: string; description?: string; image?: string; noindex?: boolean; schema?: object; }
-const { title = 'Thoughtful code. Useful things.', description = site.description, image = 'home', noindex = false, schema } = Astro.props;
+const { title = 'Charlie, useful apps and automation', description = site.description, image = 'home', noindex = false, schema } = Astro.props;
 const locale = localeFromPath(Astro.url.pathname);
 const englishPath = localizePath(Astro.url.pathname, 'en');
 const portfolioBase = import.meta.env.PUBLIC_PORTFOLIO_URL || (Astro.site?.hostname.startsWith('blog.') || Astro.site?.hostname.startsWith('learn.') || Astro.site?.hostname.startsWith('admin.') ? 'http://localhost:4321' : '');
@@ -64,8 +64,8 @@ const isConfigured = site.url !== 'https://portfolio.example';
     <footer class="page-shell">
       <div class="flex flex-wrap items-center justify-between gap-6 border-t py-8 text-sm text-muted-foreground">
         <a href={`${portfolioBase}/`} class="font-semibold text-foreground">chermdev<span class="text-muted-foreground">.</span></a>
-        <span>A small corner of the internet, made with care.</span>
-        <div class="flex items-center gap-6"><a class="text-link" href={site.github}>GitHub <ArrowUpRight aria-hidden="true" size={16} strokeWidth={1.5} /></a><a class="text-link" href={`${portfolioBase}/system-design`}>Design system</a><span>© {new Date().getFullYear()}</span></div>
+        <span>Built and maintained by Charlie.</span>
+        <div class="flex items-center gap-6"><a class="text-link" href={site.github}>GitHub <ArrowUpRight aria-hidden="true" size={16} strokeWidth={1.5} /></a><a class="text-link" href={site.linkedin}>LinkedIn <ArrowUpRight aria-hidden="true" size={16} strokeWidth={1.5} /></a><a class="text-link" href={`${portfolioBase}/system-design`}>Design system</a><span>© {new Date().getFullYear()}</span></div>
       </div>
     </footer>
   </body>
