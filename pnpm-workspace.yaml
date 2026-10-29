@@ -1,0 +1,15 @@
+packages:
+  - apps/*
+  - packages/*
+minimumReleaseAge: 1440
+blockExoticSubdeps: true
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  # Legacy release required by Astro's language server; registry signature metadata inspected.
+  - chokidar@4.0.3
+strictDepBuilds: true
+overrides:
+  reselect: 5.3.0
+onlyBuiltDependencies:
+  - esbuild
+  - sharp

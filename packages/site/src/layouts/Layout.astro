@@ -1,0 +1,72 @@
+---
+import { localeFromPath, localizePath } from '@portfolio/i18n';
+import { ArrowUpRight } from 'lucide-react';
+import '@fontsource-variable/manrope/index.css';
+import '@portfolio/ui/styles.css';
+import Header from '../components/Header';
+import { site } from '../lib/site';
+interface Props { title?: string; description?: string; image?: string; noindex?: boolean; schema?: object; }
+const { title = 'Thoughtful code. Useful things.', description = site.description, image = 'home', noindex = false, schema } = Astro.props;
+const locale = localeFromPath(Astro.url.pathname);
+const englishPath = localizePath(Astro.url.pathname, 'en');
+const portfolioBase = import.meta.env.PUBLIC_PORTFOLIO_URL || (Astro.site?.hostname.startsWith('blog.') || Astro.site?.hostname.startsWith('learn.') || Astro.site?.hostname.startsWith('admin.') ? 'http://localhost:4321' : '');
+const externalSection = englishPath.startsWith('/notes') && import.meta.env.PUBLIC_BLOG_URL ? { base: import.meta.env.PUBLIC_BLOG_URL, prefix: '/notes' } : englishPath.startsWith('/learn') && import.meta.env.PUBLIC_LEARN_URL ? { base: import.meta.env.PUBLIC_LEARN_URL, prefix: '/learn' } : null;
+const canonical = externalSection ? new URL(localizePath(englishPath.slice(externalSection.prefix.length) || '/', locale) || '/', externalSection.base).href : new URL(Astro.url.pathname, site.url).href;
+const og = new URL(`/og/${image}${locale === 'es' ? '-es' : ''}.png`, site.url).href;
+const isConfigured = site.url !== 'https://portfolio.example';
+---
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>{title} | chermdev</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light dark" />
+    {(noindex || !isConfigured || externalSection) && <meta name="robots" content="noindex, follow" />}
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={new URL(localizePath(new URL(canonical).pathname, 'en'), canonical).href} />
+    <link rel="alternate" hreflang="es" href={new URL(localizePath(new URL(canonical).pathname, 'es'), canonical).href} />
+    <meta property="og:locale" content={locale === 'es' ? 'es_MX' : 'en_US'} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="chermdev" />
+    <meta property="og:title" content={`${title} | chermdev`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={og} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content={`${title} — developer tools and experiments by chermdev`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${title} | chermdev`} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={og} />
+    <meta name="twitter:image:alt" content={`${title} — chermdev`} />
+    {schema && <script type="application/ld+json" set:html={JSON.stringify(schema).replace(/</g, '\\u003c')} />}
+    <script is:inline>
+      try {
+        const saved = localStorage.getItem('theme');
+        document.documentElement.classList.toggle('dark', saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches);
+      } catch {}
+    </script>
+    <script>
+      document.addEventListener('keydown', () => { document.documentElement.dataset.input = 'keyboard'; }, { passive: true });
+      document.addEventListener('pointerdown', () => { delete document.documentElement.dataset.input; }, { passive: true });
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header locale={locale} pathname={Astro.url.pathname} portfolioBase={portfolioBase} notesHref={import.meta.env.PUBLIC_BLOG_URL || `${portfolioBase}/notes`} client:load />
+    <main id="main"><slot /></main>
+    <footer class="page-shell">
+      <div class="flex flex-wrap items-center justify-between gap-6 border-t py-8 text-sm text-muted-foreground">
+        <a href={`${portfolioBase}/`} class="font-semibold text-foreground">chermdev<span class="text-muted-foreground">.</span></a>
+        <span>A small corner of the internet, made with care.</span>
+        <div class="flex items-center gap-6"><a class="text-link" href={site.github}>GitHub <ArrowUpRight aria-hidden="true" size={16} strokeWidth={1.5} /></a><a class="text-link" href={`${portfolioBase}/system-design`}>Design system</a><span>© {new Date().getFullYear()}</span></div>
+      </div>
+    </footer>
+  </body>
+</html>

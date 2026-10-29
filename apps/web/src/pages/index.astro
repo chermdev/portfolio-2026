@@ -1,0 +1,28 @@
+---
+import Layout from '@portfolio/site/layouts/Layout.astro';
+import Sculpture from '../components/Sculpture.astro';
+import ToolList from '../components/ToolList.astro';
+import ProjectCards from '../components/ProjectCards.astro';
+import { buttonVariants } from '@portfolio/ui/components/button';
+import { ArrowDown, ArrowUpRight, ArrowRight, Code2, Sprout } from 'lucide-react';
+import { site, destinations } from '@portfolio/site/lib/site';
+---
+<Layout schema={{ '@context': 'https://schema.org', '@type': 'Person', name: 'chermdev', url: site.url, sameAs: [site.github] }}>
+  <section class="page-shell">
+    <div class="hero-grid"><div class="hero-copy">
+      <p class="mb-7 flex items-center gap-3 text-sm text-muted-foreground" data-enter><span class="size-2 rounded-full bg-success"></span>Developer. Builder. Curious human.</p>
+      <h1 class="display" data-enter>Thoughtful code.<br />Useful things.</h1>
+      <p class="lead mt-7 max-w-sm" data-enter>I’m chermdev. I turn ideas into things you can use, explore, and sometimes just play with.</p>
+      <div class="mt-9 flex flex-wrap items-center gap-4" data-enter><a class={buttonVariants({size: "lg"})} href="/projects">Explore my work <ArrowUpRight data-icon="inline-end" /></a><a class={buttonVariants({size: "lg", variant: "ghost"})} href="/tools">Try the tools <ArrowRight data-icon="inline-end" /></a></div>
+    </div><Sculpture /></div>
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b py-7 text-xs text-muted-foreground"><span class="flex items-center gap-2"><Code2 size={15} strokeWidth={1.5} /> At the intersection of design & engineering</span><span class="hidden sm:block">An independent corner of the web</span><a href="#selected" class="flex min-h-10 items-center gap-3">A little further down <ArrowDown size={15} strokeWidth={1.5} /></a></div>
+  </section>
+  <section id="selected" class="page-shell section"><div class="mb-10 flex flex-wrap items-end justify-between gap-6"><div><p class="mb-4 text-sm text-muted-foreground">Built with intention</p><h2 class="section-heading">Ideas, made real.</h2></div><a class="text-link" href="/projects">All projects <ArrowUpRight size={16} /></a></div><ProjectCards /></section>
+  <section class="page-shell pb-section"><div class="grid gap-10 border-t pt-section lg:grid-cols-3"><div><p class="mb-4 text-sm text-muted-foreground">Small tools. Real utility.</p><h2 class="section-heading">Less guesswork.<br />More clarity.</h2><p class="lead mt-5">A growing collection of free tools for the decisions that deserve a little math.</p><a class="text-link mt-6" href="/tools">Explore the toolbox <ArrowUpRight size={16} /></a></div><div class="lg:col-span-2"><ToolList /></div></div></section>
+  <section id="about" class="bg-secondary/50"><div class="page-shell section grid gap-10 md:grid-cols-2"><div><Sprout size={32} strokeWidth={1.5} className="mb-6 text-secondary-foreground" /><h2 class="section-heading">Always building.<br />Always learning.</h2></div><div class="flex flex-col items-start gap-6 pt-2"><p class="lead">I like understanding how things work—and finding ways to make them work a little better.</p><p class="lead">This is my space to build useful software, experiment with new ideas, and share what I learn along the way. Some things are polished. Others are happily in progress.</p><div class="flex flex-wrap gap-6"><a href={site.github} class="text-link">Find me on GitHub <ArrowUpRight size={16} /></a><a href={destinations.learn} class="text-link">Learn with me <ArrowUpRight size={16} /></a></div></div></div></section>
+  <section class="page-shell py-section flex flex-wrap items-center justify-between gap-8"><div><p class="text-muted-foreground mb-3">Good things start with a conversation.</p><h2 class="subheading">Have something in mind?</h2></div><a class={buttonVariants({size: "lg"})} href={site.github}>Let’s connect <ArrowUpRight data-icon="inline-end" /></a></section>
+</Layout>
+<script>
+  import { gsap } from 'gsap';
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) gsap.from('[data-enter]', { y: 16, opacity: 0, duration: 0.7, stagger: 0.1, ease: 'power3.out', clearProps: 'all' });
+</script>

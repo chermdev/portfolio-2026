@@ -1,0 +1,17 @@
+---
+import { ArrowLeft } from 'lucide-react';
+import Layout from '@portfolio/site/layouts/Layout.astro';
+import { site } from '@portfolio/site/lib/site';
+interface Props { title: string; description: string; image: string; category: string; }
+const { title, description, image, category } = Astro.props;
+---
+<Layout title={title} description={description} image={image} schema={{ '@context': 'https://schema.org', '@type': 'WebApplication', name: title, description, url: new URL(Astro.url.pathname, site.url).href, applicationCategory: 'FinanceApplication', operatingSystem: 'Any', browserRequirements: 'Requires JavaScript', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }, author: { '@type': 'Person', name: 'chermdev', url: site.github } }}>
+  <section class="page-shell pt-12 pb-section">
+    <nav aria-label="Breadcrumb" class="mb-10 flex items-center gap-3 text-sm text-muted-foreground"><a class="text-link" href="/tools">Tools</a><span aria-hidden="true">/</span><span>{category}</span></nav>
+    <h1 class="section-heading">{title}</h1><p class="lead mt-5 mb-12 max-w-2xl">{description}</p>
+    <noscript><p class="rounded-lg border p-5 mb-8">Enable JavaScript to use the interactive calculator. The formulas and assumptions are explained below.</p></noscript>
+    <slot />
+    <section class="mt-16 border-t pt-12"><slot name="guide" /></section>
+    <div class="mt-12 border-t pt-8"><a class="text-link" href="/tools"><ArrowLeft aria-hidden="true" size={16} strokeWidth={1.5} /> Explore all tools</a></div>
+  </section>
+</Layout>

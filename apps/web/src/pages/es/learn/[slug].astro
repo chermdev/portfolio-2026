@@ -1,0 +1,7 @@
+---
+import Layout from '@portfolio/site/layouts/Layout.astro';
+import GuideArticle from '@portfolio/site/components/GuideArticle.astro';
+export function getStaticPaths() { return [{ params: { slug: 'loan-math' } }, { params: { slug: 'reverse-fees' } }]; }
+const { slug } = Astro.params;
+---
+<Layout title={slug === 'loan-math' ? 'The math behind a monthly payment' : 'Working backwards from a net payment'} image="learn"><GuideArticle slug={slug} /></Layout>

@@ -1,0 +1,1 @@
+{"name":"@portfolio/i18n","private":true,"type":"module","exports":{".":"./src/index.ts","./react":"./src/react.tsx","./middleware":"./src/middleware.ts"},"dependencies":{"parse5":"8.0.1","react":"19.3.0"},"devDependencies":{"@types/react":"19.3.0"}}

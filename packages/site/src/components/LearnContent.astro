@@ -1,0 +1,5 @@
+---
+import { ArrowUpRight } from 'lucide-react';
+const { guideBase = '/learn' } = Astro.props;
+---
+<section class="page-shell section"><p class="mb-5 text-sm text-muted-foreground">Learn by taking things apart</p><h1 class="section-heading">Make room for curiosity.</h1><p class="lead mt-6 mb-14">Short guides to the ideas behind the tools. Start with something you can use, then look inside.</p><a href={`${guideBase}/loan-math`} class="tool-row"><div class="flex-1"><h2 class="subheading">The math behind a monthly payment</h2><p class="mt-3 text-muted-foreground">Interest, principal, and why a longer term costs more.</p></div><span aria-hidden="true"><ArrowUpRight aria-hidden="true" size={16} strokeWidth={1.5} /></span></a><a href={`${guideBase}/reverse-fees`} class="tool-row"><div class="flex-1"><h2 class="subheading">Working backwards from a net payment</h2><p class="mt-3 text-muted-foreground">Why adding the fee percentage back isn’t enough.</p></div><span aria-hidden="true"><ArrowUpRight aria-hidden="true" size={16} strokeWidth={1.5} /></span></a></section>

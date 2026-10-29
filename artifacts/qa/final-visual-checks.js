@@ -1,0 +1,37 @@
+async page => {
+ const errors=[]; page.on('pageerror',e=>errors.push(e.message));
+ const base='http://127.0.0.1:4173';
+ await page.setViewportSize({width:390,height:844});
+ await page.goto(base+'/');
+ await page.evaluate(()=>localStorage.setItem('theme','light'));
+ await page.reload();
+ await page.waitForFunction(()=>Array.from(document.querySelectorAll('[data-enter]')).every(el=>Number(getComputedStyle(el).opacity)===1));
+ await page.locator('[data-sculpture][data-ready]').waitFor();
+ await page.screenshot({path:'/Users/chsh/repos/portfolio-2026/artifacts/qa/home-mobile.png',fullPage:true});
+ await page.getByRole('button',{name:'Toggle light and dark theme'}).click();
+ await page.screenshot({path:'/Users/chsh/repos/portfolio-2026/artifacts/qa/home-mobile-dark.png',fullPage:true});
+ await page.getByRole('button',{name:'Open navigation'}).click();
+ await page.getByRole('dialog').waitFor();
+ await page.keyboard.press('Escape');
+ await page.getByRole('dialog').waitFor({state:'hidden'});
+ await page.getByRole('button',{name:'Toggle light and dark theme'}).click();
+ await page.setViewportSize({width:1440,height:1000});
+ await page.goto(base+'/tools/stripe-calculator');
+ await page.screenshot({path:'/Users/chsh/repos/portfolio-2026/artifacts/qa/stripe-desktop.png',fullPage:true});
+ await page.keyboard.press('Tab');
+ const skip=await page.locator('.skip-link').evaluate(el=>({focused:el===document.activeElement,y:el.getBoundingClientRect().y}));
+ if(!skip.focused||skip.y<0)throw Error('Skip link focus failure');
+ await page.goto(base+'/projects/objects-of-curiosity');
+ await page.locator('[data-sculpture][data-ready]').waitFor();
+ await page.getByLabel('Material',{exact:true}).selectOption('wireframe');
+ if(await page.getByLabel('Material',{exact:true}).inputValue()!=='wireframe')throw Error('Material failed');
+ await page.goto(base+'/system-design');
+ await page.locator('aside').getByRole('button',{name:'sonner',exact:true}).click();
+ await page.getByRole('button',{name:'Toggle light and dark theme'}).click();
+ await page.getByRole('button',{name:'Show toast',exact:true}).click();
+ const toastTheme=await page.locator('[data-sonner-toaster]').getAttribute('data-sonner-theme');
+ if(toastTheme!=='dark')throw Error('Toast theme failed: '+toastTheme);
+ await page.getByRole('button',{name:'Toggle light and dark theme'}).click();
+ if(errors.length)throw Error(errors.join(';'));
+ return {status:'passed',checks:['mobile light/dark','menu Escape','keyboard skip link','material picker','toast theme']};
+}

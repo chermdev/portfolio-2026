@@ -1,0 +1,5 @@
+---
+import Layout from '@portfolio/site/layouts/Layout.astro';
+import { LockKeyhole, ArrowUpRight } from 'lucide-react';
+---
+<Layout title="Administration" noindex><section class="page-shell section"><LockKeyhole size={32} strokeWidth={1.5} className="mb-8 text-muted-foreground" /><h1 class="section-heading">A space for what’s next.</h1><p class="lead mt-6">The administration workspace is reserved. Management features are not enabled yet.</p><p class="mt-6 max-w-xl text-sm leading-7 text-muted-foreground">This page does not collect credentials or expose private information. Authentication and access control will be added before publishing or account management is available.</p><a href={import.meta.env.PUBLIC_PORTFOLIO_URL || 'http://localhost:4321'} class="text-link mt-8">Back to the portfolio <ArrowUpRight aria-hidden="true" size={16} strokeWidth={1.5} /></a></section></Layout>

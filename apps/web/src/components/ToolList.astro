@@ -1,0 +1,6 @@
+---
+import { CreditCard, CarFront, House, ArrowUpRight } from 'lucide-react';
+import { tools } from '@portfolio/site/lib/site';
+const icons = { stripe: CreditCard, car: CarFront, home: House };
+---
+<div>{tools.map(tool => { const Icon = icons[tool.icon]; return <a href={`/tools/${tool.slug}`} class="tool-row group"><span class="tool-icon"><Icon size={23} strokeWidth={1.5} /></span><div class="flex-1"><h3 class="text-lg font-medium tracking-tight">{tool.name}</h3><p class="mt-1 text-sm leading-6 text-muted-foreground">{tool.description}</p></div><span class="hidden text-xs text-muted-foreground sm:block">{tool.tag}</span><ArrowUpRight size={20} strokeWidth={1.5} /></a>; })}</div>

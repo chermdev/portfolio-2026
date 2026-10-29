@@ -1,0 +1,14 @@
+import { existsSync } from 'node:fs';
+if (existsSync('.env')) process.loadEnvFile('.env');
+// @ts-check
+import { defineConfig } from 'astro/config';
+import react from '@astrojs/react';
+import sitemap from '@astrojs/sitemap';
+import tailwindcss from '@tailwindcss/vite';
+
+// https://astro.build/config
+export default defineConfig({
+  site: process.env.PUBLIC_SITE_URL || 'https://portfolio.example',
+  integrations: [react(), sitemap({ filter: (page) => !page.includes('/system-design') })],
+  vite: { cacheDir: process.env.npm_lifecycle_event === 'build' ? 'node_modules/.vite-build' : 'node_modules/.vite-dev', plugins: [tailwindcss()], ssr: { noExternal: ['@portfolio/i18n', '@portfolio/site', '@portfolio/ui', '@fontsource-variable/manrope'] } },
+});

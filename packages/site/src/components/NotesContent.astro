@@ -1,0 +1,5 @@
+---
+import { ArrowUpRight } from 'lucide-react';
+const { articleBase = '/notes' } = Astro.props;
+---
+<section class="page-shell section"><p class="mb-5 text-sm text-muted-foreground">Notes from the workbench</p><h1 class="section-heading">Thinking out loud.</h1><p class="lead mt-6 mb-14">Small observations about building things for the web. A place to leave the useful bits.</p><a href={`${articleBase}/a-home-for-experiments`} class="grid gap-6 border-t py-9 md:grid-cols-3"><p class="text-sm text-muted-foreground">September 26, 2026<br /><span class="mt-2 block">3 min read</span></p><div class="md:col-span-2"><h2 class="subheading">A home for experiments.</h2><p class="mt-4 max-w-xl text-muted-foreground leading-7">How this portfolio brings useful tools, a shared design system, and room to try something new into one workspace.</p><span class="text-link mt-4">Read the note <ArrowUpRight aria-hidden="true" size={16} strokeWidth={1.5} /></span></div></a></section>

@@ -1,0 +1,13 @@
+---
+import { Pause, Play } from 'lucide-react';
+const { interactive = false } = Astro.props;
+---
+<div class="hero-art" data-sculpture data-interactive={interactive}>
+  <img src="/sculpture.png" alt="An intertwined silver ribbon, a study in light and geometry" width="720" height="720" fetchpriority="high" />
+  <canvas aria-hidden="true"></canvas>
+  <div class="art-caption"><span>Objects of curiosity</span><button type="button" data-pause class="flex size-9 items-center justify-center rounded-full border bg-background/80" aria-label="Pause sculpture animation" aria-pressed="false"><Pause data-pause-icon aria-hidden="true" size={16} strokeWidth={1.5} /><Play data-play-icon aria-hidden="true" size={16} strokeWidth={1.5} className="hidden" /></button></div>
+</div>
+<script>
+  import { initSculpture } from '../scripts/sculpture';
+  document.querySelectorAll<HTMLElement>('[data-sculpture]').forEach(element => initSculpture(element).catch(() => element.querySelector('[data-pause]')?.remove()));
+</script>

@@ -1,0 +1,19 @@
+{
+  "name": "@portfolio/site",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./layouts/*": "./src/layouts/*",
+    "./components/*": "./src/components/*",
+    "./lib/*": "./src/lib/*.ts"
+  },
+  "dependencies": {
+    "@fontsource-variable/manrope": "5.3.0",
+    "@portfolio/i18n": "workspace:*",
+    "@portfolio/ui": "workspace:*",
+    "astro": "7.3.5",
+    "lucide-react": "1.48.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  }
+}
