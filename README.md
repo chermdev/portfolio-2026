@@ -1,6 +1,6 @@
 # chermdev
 
-A minimalist developer portfolio, useful financial tools, and room for experiments. Built with Astro, React islands, Tailwind CSS, shadcn, GSAP, and Three.js.
+The personal site of Charlie (chermdev): websites, apps, and automation projects, plus free tools that run in the browser. Built with Astro, React islands, Tailwind CSS, and shadcn.
 
 ## Run locally
 
@@ -22,18 +22,19 @@ pnpm --filter @portfolio/admin dev # :4324
 
 ## Included
 
-- Portfolio landing page, project gallery, and an interactive Three.js material study.
+- Home with about, screenshot cards for websites and apps, the tool list, and contact. `/projects` adds the code and automation repositories.
 - `/tools/stripe-calculator`: Mexico/MXN and US/USD presets, editable processing/Radar/surcharge/tax values, forward and reverse calculations.
 - `/tools/auto-loan-calculator`: monthly payments, purchasing power, cash/percentage down payment, trade-in equity, downloadable amortization.
 - `/tools/mortgage-calculator`: both modes, 10–95% down payment in 5% steps, downloadable amortization.
+- `/tools/compound-interest-calculator`: initial deposit, monthly contributions, daily/monthly/annual compounding, growth chart, yearly table, monthly CSV.
 - Both loan simulators support multiple extra principal deposits, lower-payment or shorter-term strategies, interest savings, and adjusted schedule/CSV totals.
 - `/system-design`: shared color/layout tokens and 61 live official shadcn component previews. The upstream questionnaire entry for the selected style is unavailable.
 - Blog and learning apps, with root-site previews at `/notes` and `/learn`.
 - An inactive admin app with no private data or management endpoints. Add authentication before real admin features.
-- White/neutral-black themes, mobile navigation, reduced-motion stills, and pausable WebGL.
+- White/neutral-black themes, a colored hero gradient that runs behind the navbar, and mobile navigation.
 - English root routes and Spanish `/es` routes, with translated metadata, tool inputs, validation and CSV headers.
 - Independent Zustand localStorage drafts for every calculator, including deposits, plus per-tool reset buttons. Inputs stay on the same browser/origin; clearing browser storage removes them.
-- SEO metadata, sitemap/robots, tool structured data, and sixteen Open Graph cards (English and Spanish).
+- SEO metadata, sitemap/robots, tool structured data, and eighteen Open Graph cards (English and Spanish).
 
 ## Workspace
 
@@ -72,10 +73,12 @@ Read [DESIGN.md](DESIGN.md) before UI changes and [AGENTS.md](AGENTS.md) for wor
 
 ## Share images
 
-`apps/web/scripts/generate-og.mjs` reads the shared color tokens, renders the actual Manrope 500 font as vector paths, and composes it with `apps/web/public/sculpture.png`, captured from the live Three.js scene. Editable SVG sources and 400×210 proofs are in `apps/web/artifacts/og`; 1200×630 PNGs are in `apps/web/public/og`.
+`apps/web/scripts/generate-og.mjs` reads the shared color tokens, renders the actual Manrope 500 font as vector paths, and composes it with `apps/web/public/sculpture.png`, a still of the chrome torus knot. Project screenshots live in `apps/web/src/assets/projects` and are optimized to WebP at build time. Editable SVG sources and 400×210 proofs are in `apps/web/artifacts/og`; 1200×630 PNGs are in `apps/web/public/og`.
 
 ## Financial assumptions
 
 Stripe presets were checked against official US/Mexico payment and Radar pricing on September 26, 2026. The UI links to sources. Every fee field is editable. Subscription/account charges, blocked-screening volume, disputes, installments, and refunds are excluded from the per-successful-payment estimate. Pro abuse-event costs can be allocated manually.
+
+The compound interest rate is illustrative, not a market rate. Contributions land at the end of each month; daily and annual compounding use the equivalent monthly rate. Balances above 1 trillion are rejected because cent precision is lost.
 
 Loan rates are illustrative, not lender quotes. Calculations use fixed nominal annual interest and monthly payments; taxes, insurance, and lender-specific costs are excluded. Totals come from the rounded schedule, which shows the final adjusted installment. Configurations that do not amortize at cent precision are rejected.
