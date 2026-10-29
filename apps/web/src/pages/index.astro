@@ -19,7 +19,8 @@ const focus = [
 ];
 ---
 <Layout schema={{ '@context': 'https://schema.org', '@type': 'Person', name: 'Charlie', alternateName: 'chermdev', url: site.url, sameAs: [site.github, site.linkedin] }}>
-  <section class="page-shell">
+  <!-- Pulled up under the h-24 header so the navbar sits on the same gradient. -->
+  <div class="hero-gradient -mt-24 pt-24"><section class="page-shell">
     <div class="hero-grid gap-12">
       <div class="hero-copy">
         <p class="meta mb-7 flex items-center gap-3"><span class="size-2 rounded-full bg-success"></span>Charlie · chermdev</p>
@@ -33,7 +34,7 @@ const focus = [
         <div class="grid gap-1 px-5 py-4 text-muted-foreground"><span class="meta">later</span><span class="font-medium">Blog and courses</span><span class="text-sm leading-6">Notes and video lessons, once there’s enough worth sharing.</span></div>
       </nav>
     </div>
-  </section>
+  </section></div>
   <section id="about" class="bg-secondary/50"><div class="page-shell section grid gap-12 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
     <div class="md:sticky md:top-8 md:self-start">
       <p class="meta mb-4">About</p><h2 class="section-heading">Hi, I’m Charlie.</h2>

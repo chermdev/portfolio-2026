@@ -34,6 +34,9 @@
   --chart-3: #9aaabb;
   --chart-4: #c9b38e;
   --chart-5: #a0a79e;
+  --glow-1: #8b5cf6;
+  --glow-2: #14b8a6;
+  --glow-3: #3b82f6;
   --sidebar: var(--card);
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary);
@@ -161,7 +164,8 @@
   .hero-copy { position: relative; z-index: 1; padding-block: 4rem; container-type: inline-size; }
   /* Size the title to its column so a long word like "automatizaciones" fits without widening the grid. */
   .hero-copy .display { font-size: min(var(--font-display), 12.5cqi); }
-  /* Workbench labels: paths, stacks, and status read as monospace metadata. */
+  /* Hero gradient: violet, blue, and teal light over the page color, fading out below the hero. */
+  .hero-gradient { background: radial-gradient(ellipse 55% 75% at 90% 0%, color-mix(in oklab, var(--glow-1) 45%, transparent), transparent 70%), radial-gradient(ellipse 45% 60% at 50% 0%, color-mix(in oklab, var(--glow-3) 28%, transparent), transparent 70%), radial-gradient(ellipse 50% 70% at 5% 10%, color-mix(in oklab, var(--glow-2) 35%, transparent), transparent 70%); }  /* Workbench labels: paths, stacks, and status read as monospace metadata. */
   .meta { @apply font-mono text-xs text-muted-foreground; letter-spacing: 0; }
   .tool-row { @apply flex items-center gap-5 py-7 border-t; }
   .tool-icon { @apply flex size-12 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground; }

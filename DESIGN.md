@@ -31,7 +31,7 @@ mobile:  [ identity                         menu/theme ]
          [ about / projects / tools / contact, stacked ]
 ```
 
-All content aligns to `.page-shell`. Section spacing uses `.section`, `py-section`, or `pt-section`. The global max width, gutters, text scales, and radius are CSS variables exposed through Tailwind. Tailwind's shared spacing scale handles gaps, padding, and margins; do not invent per-page pixel values. Inner page headers (`/tools`, `/projects`, tool pages) start with `pt-12 pb-section`; `.section` spacing is for the sections below them. The chrome torus knot still (`/sculpture.png`) is only the OG image mark. Avoid decorative gradients and motion.
+All content aligns to `.page-shell`. Section spacing uses `.section`, `py-section`, or `pt-section`. The global max width, gutters, text scales, and radius are CSS variables exposed through Tailwind. Tailwind's shared spacing scale handles gaps, padding, and margins; do not invent per-page pixel values. Inner page headers (`/tools`, `/projects`, tool pages) start with `pt-12 pb-section`; `.section` spacing is for the sections below them. The home hero uses `.hero-gradient`, a static violet, blue, and teal light from the `--glow-*` tokens; the home pulls it up under the header so the navbar shares it. Keep it soft enough that text never needs a backdrop. The chrome torus knot still (`/sculpture.png`) is only the OG image mark. Avoid other decorative gradients and motion.
 
 ## Components
 
