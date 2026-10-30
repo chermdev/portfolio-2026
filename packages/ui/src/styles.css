@@ -168,10 +168,56 @@
   .hero-gradient { background: radial-gradient(ellipse 55% 75% at 90% 0%, color-mix(in oklab, var(--glow-1) 45%, transparent), transparent 70%), radial-gradient(ellipse 45% 60% at 50% 0%, color-mix(in oklab, var(--glow-3) 28%, transparent), transparent 70%), radial-gradient(ellipse 50% 70% at 5% 10%, color-mix(in oklab, var(--glow-2) 35%, transparent), transparent 70%); }  /* Workbench labels: paths, stacks, and status read as monospace metadata. */
   .meta { @apply font-mono text-xs text-muted-foreground; letter-spacing: 0; }
   .tool-row { @apply flex items-center gap-5 py-7 border-t; }
-  .tool-icon { @apply flex size-12 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground; }
-  .tool-row:hover .tool-icon { @apply bg-accent text-accent-foreground; }
+  /* Tools as apps: a widget card with a solid app icon (tinted by --app) and an example result. */
+  .tool-widget { @apply flex flex-col rounded-2xl border bg-card p-5 transition-colors duration-150; }
+  a.tool-widget:hover { border-color: color-mix(in oklab, var(--foreground) 25%, transparent); }
+  .app-icon { @apply flex size-11 shrink-0 items-center justify-center rounded-[0.85rem] text-white; background: var(--app); }
+  .tool-widget.border-dashed .app-icon { @apply border border-dashed bg-transparent text-muted-foreground; }
+  .tool-widget-value { margin-top: 0.25rem; font-size: 1.75rem; line-height: 1.15; letter-spacing: -0.04em; font-weight: 500; font-variant-numeric: tabular-nums; }
   .result-panel { @apply rounded-2xl bg-secondary p-7 flex flex-col gap-6; container-type: inline-size; }
   .result-value { /* Sized by the panel, not the viewport, so long amounts stay on one line. */ font-size: clamp(1.75rem, 11cqi, 3.8rem); line-height: 1.1; letter-spacing: -0.06em; font-weight: 500; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  /* Tool pages: one large primary amount, a receipt-style result, and a result bar on small screens. */
+  .amount-field { @apply flex items-baseline gap-3 border-b-2 pb-1 transition-colors duration-150; }
+  .amount-field:focus-within { border-color: var(--ring); }
+  .amount-input { @apply w-full min-w-0 bg-transparent outline-none; font-size: clamp(2rem, 5vw, 2.75rem); line-height: 1.2; letter-spacing: -0.04em; font-weight: 500; font-variant-numeric: tabular-nums; appearance: textfield; }
+  .amount-input::-webkit-inner-spin-button, .amount-input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+  .receipt { @apply text-sm; }
+  .receipt-row { @apply flex items-baseline justify-between gap-4 py-1 text-muted-foreground; }
+  .receipt-row dd { @apply shrink-0 font-mono; font-variant-numeric: tabular-nums; }
+  .receipt-row:first-child, .receipt-total { @apply text-foreground; }
+  .receipt-total { @apply mt-2 border-t border-dashed border-foreground/30 pt-3 font-medium; }
+  .receipt-bar { @apply flex h-2.5 gap-0.5 overflow-hidden rounded-full; }
+  .receipt-bar > span { min-width: 3px; }
+  .receipt-formula { @apply rounded-lg bg-background/70 px-3 py-2 font-mono text-xs leading-6 text-muted-foreground; }
+  .mobile-result { @apply fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-4 border-t bg-background/90 px-5 py-3 backdrop-blur; transition: translate 150ms var(--ease-out); }
+  .mobile-result[data-visible="false"] { translate: 0 100%; }
+  @media (prefers-reduced-motion: reduce) { .mobile-result { transition: none; } }
+  /* App workspace for tools: it sits in the page column, aligned with the header, as a framed window
+     (toolbar with a tool switcher, then an inputs pane and a result pane). It is at least as tall as the screen
+     under the h-24 header, and the page itself scrolls: no inner scroll bars. */
+  .tool-app { @apply flex flex-col gap-5 pt-5 pb-6; max-width: var(--layout-max); margin-inline: auto; padding-inline: var(--page-gutter); }
+  .tool-toolbar { @apply flex flex-wrap items-center gap-3; }
+  .tool-switcher { @apply order-last flex w-full items-center gap-2 sm:order-none sm:w-auto; }
+  .tool-switcher a { @apply rounded-[0.8rem] p-0.5 opacity-60 outline-none transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring; }
+  .tool-switcher a[aria-current="page"] { @apply opacity-100 ring-2 ring-foreground/20; }
+  .tool-workspace { @apply grid overflow-hidden rounded-2xl border; grid-template-columns: minmax(0, 1fr); }
+  .tool-pane-inputs { @apply flex flex-col gap-6 border-b bg-secondary/40 p-5 sm:p-6; }
+  .tool-pane-result { @apply @container min-w-0 p-5 sm:p-8; }
+  @media (min-width: 64rem) {
+    .tool-app { min-height: calc(100dvh - 6rem); }
+    .tool-workspace { @apply flex-1; grid-template-columns: 23rem minmax(0, 1fr); }
+    .tool-pane-inputs { @apply border-r border-b-0; }
+  }
+  .tool-guide { margin: 0 0 0 auto; width: min(34rem, 100vw); max-width: 100vw; height: 100dvh; max-height: 100dvh; @apply overflow-y-auto border-l bg-background p-6 text-foreground sm:p-8; }
+  .tool-guide::backdrop { background: color-mix(in oklab, black 45%, transparent); }
+  /* Tool guides: questions open in place with native <details>; no script needed. */
+  .faq { @apply border-b; }
+  .faq details { @apply border-t; }
+  .faq summary { @apply flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-lg font-medium tracking-tight; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; @apply font-mono text-xl text-muted-foreground; }
+  .faq details[open] summary::after { content: "−"; }
+  .faq details > div { @apply pb-6; }
   .data-row { @apply flex justify-between gap-4 text-sm py-2; font-variant-numeric: tabular-nums; }
   .prose-copy { @apply text-muted-foreground leading-8; max-width: 68ch; }
   .prose-copy h2 { @apply text-foreground mt-12 mb-4; font-size: var(--font-subheading); letter-spacing: -0.04em; }

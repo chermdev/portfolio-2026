@@ -1,17 +1,17 @@
+import { useRef } from 'react';
 import { LocaleProvider, useTranslation } from '@portfolio/i18n/react';
 import { type Locale } from '@portfolio/i18n';
 import { useSavingsStore, useHydrateCalculator } from '../../stores/calculators';
-import { Download, PiggyBank, RotateCcw } from 'lucide-react';
+import { Download, RotateCcw, ShieldCheck } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Button } from '@portfolio/ui/components/button';
 import { FieldGroup, Field, FieldLabel, FieldDescription } from '@portfolio/ui/components/field';
-import { Separator } from '@portfolio/ui/components/separator';
 import { ToggleGroup, ToggleGroupItem } from '@portfolio/ui/components/toggle-group';
 import { Alert, AlertTitle, AlertDescription } from '@portfolio/ui/components/alert';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@portfolio/ui/components/table';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@portfolio/ui/components/chart';
 import { savingsGrowth, roundMoney, type Compounding } from '@portfolio/calculators';
-import { NumberField, SelectField, ResultRow, money } from './Fields';
+import { NumberField, SelectField, AmountField, Settings, Receipt, MobileResult, Insights, money } from './Fields';
 function SavingsCalculatorContent() {
   const { t, locale } = useTranslation();
   useHydrateCalculator(useSavingsStore);
@@ -33,30 +33,62 @@ function SavingsCalculatorContent() {
     return { year: index + 1, contribution, interest, balance: slice.at(-1)!.balance, deposited, earned };
   });
   const final = yearly.at(-1);
-  const chartConfig = { deposited: { label: t("Contributions"), color: 'var(--chart-1)' }, earned: { label: t("Interest earned"), color: 'var(--chart-2)' } };
+  // Same colors as the receipt bar above: contributions in teal, interest in violet.
+  const chartConfig = { deposited: { label: t("Contributions"), color: 'var(--glow-2)' }, earned: { label: t("Interest earned"), color: 'var(--glow-1)' } };
   function exportCSV() {
     const csv = [[t('Month'), ...[t("Contribution"), t("Interest"), t("Balance")].map(label => `${label} (${currency})`)].join(','), ...rows.map(row => [row.month, ...[row.contribution, row.interest, row.balance].map(value => value.toFixed(2))].join(','))].join('\r\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     const anchor = document.createElement('a'); anchor.href = url; anchor.download = `savings-${currency}.csv`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
-  return <div className="flex flex-col gap-10"><div className="grid items-start gap-8 lg:grid-cols-5">
-    <div className="rounded-2xl border bg-card p-6 sm:p-8 lg:col-span-3"><FieldGroup><div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs text-muted-foreground"> {t("Inputs saved on this device.")} </p><Button variant="outline" size="sm" onClick={reset}><RotateCcw aria-hidden="true" /> {t("Reset calculator")} </Button></div>
+  const inputs = useRef<HTMLElement>(null), headlineRef = useRef<HTMLDivElement>(null);
+  const headline = t('Your balance after {years} years', { years });
+  const shown = final ? money(final.balance, currency, locale) : '—';
+  const frequency = { '365': t("Daily"), '12': t("Monthly"), '1': t("Annually") }[compounding];
+  const n = Number(compounding), r = Number(rate) / 100;
+  const share = (value: number) => new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { style: 'percent', maximumFractionDigits: 1 }).format(value);
+  const lastYear = yearly.at(-1);
+  const insights = final && lastYear ? [
+    { label: t("Total contributions"), value: money(final.deposited, currency, locale) },
+    { label: t("Interest share of the balance"), value: share(final.balance > 0 ? final.earned / final.balance : 0) },
+    { label: t('Interest earned in year {year}', { year: lastYear.year }), value: money(lastYear.interest, currency, locale) },
+  ] : [];
+  return <div className="tool-workspace">
+    <aside ref={inputs} className="tool-pane-inputs" aria-label={t("Inputs")}>
       <SelectField label={t("Currency")} value={currency} onChange={value => set('currency', value)} options={[{ value: 'MXN', label: t("Mexican peso · MXN") }, { value: 'USD', label: t("US dollar · USD") }]} />
-      <NumberField label={t("Initial deposit")} suffix={currency} value={initial} onChange={value => set('initial', value)} />
-      <NumberField label={t("Monthly contribution")} suffix={currency} value={monthly} onChange={value => set('monthly', value)} hint={t("Added at the end of each month.")} />
-      <Separator />
-      <NumberField label={t("Annual interest rate")} value={rate} onChange={value => set('rate', value)} max={100} suffix="%" hint={t("Illustrative default, not a market rate. Enter the nominal annual rate before taxes and inflation.")} />
-      <Field><FieldLabel> {t("Compounding frequency")} </FieldLabel><ToggleGroup type="single" value={compounding} onValueChange={value => { if (value) set('compounding', value as typeof compounding); }} variant="outline" className="w-full" aria-label={t("Compounding frequency")}>{([['365', t("Daily")], ['12', t("Monthly")], ['1', t("Annually")]] as const).map(([value, label]) => <ToggleGroupItem key={value} value={value} className="h-auto min-h-11 flex-1 whitespace-normal py-2 text-center">{label}</ToggleGroupItem>)}</ToggleGroup><FieldDescription> {t("How often your institution adds interest to the balance.")} </FieldDescription></Field>
-      <NumberField label={t("Years")} value={years} onChange={value => set('years', value)} min={1} max={60} step={1} />
-    </FieldGroup></div>
-    <div className="lg:col-span-2 lg:sticky lg:top-8"><section className="result-panel" aria-label={t("Savings result")} aria-live="polite" aria-atomic="true"><div className="flex items-center justify-between"><h2 className="text-sm font-medium">{t('Your balance after {years} years', { years })}</h2><PiggyBank size={22} strokeWidth={1.5} /></div>
-      {final ? <><p className="result-value">{money(final.balance, currency, locale)}</p><p className="-mt-3 text-xs text-muted-foreground">{currency} · {t("before taxes and inflation")}</p><Separator /><dl><ResultRow label={t("Initial deposit")} value={money(start, currency, locale)} /><ResultRow label={t("Monthly contributions")} value={money(roundMoney(final.deposited - start), currency, locale)} /><ResultRow label={t("Total contributions")} value={money(final.deposited, currency, locale)} /><ResultRow label={t("Interest earned")} value={money(final.earned, currency, locale)} /><ResultRow label={t("Final balance")} value={money(final.balance, currency, locale)} /></dl><Button variant="outline" onClick={exportCSV}><Download data-icon="inline-start" /> {t("Download monthly breakdown")} </Button></> : <Alert variant="destructive"><AlertTitle> {t("Check your numbers")} </AlertTitle><AlertDescription>{t(error)}</AlertDescription></Alert>}
-    </section><p className="mt-5 text-xs leading-6 text-muted-foreground"> {t("Estimates assume a constant rate, no withdrawals, fees, or taxes on interest. Changing currency changes the label, not the exchange value.")} </p></div>
-  </div>
-  {final && <section className="rounded-2xl border bg-card p-6 sm:p-8" aria-labelledby="growth-heading"><h2 id="growth-heading" className="subheading"> {t("Growth over time")} </h2><p className="mt-2 mb-6 text-sm text-muted-foreground"> {t("What you put in versus what interest adds, at the end of each year.")} </p>
-    <ChartContainer config={chartConfig} className="h-72 w-full" role="img" aria-label={t("Stacked bar chart of contributions and interest by year. The yearly breakdown table has the same values.")}><BarChart data={yearly} accessibilityLayer><CartesianGrid vertical={false} /><XAxis dataKey="year" tickLine={false} axisLine={false} /><YAxis width={72} tickLine={false} axisLine={false} tickFormatter={value => new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { notation: 'compact' }).format(value)} /><ChartTooltip content={<ChartTooltipContent labelFormatter={(_, payload) => t('Year {year}', { year: payload[0]?.payload.year })} formatter={(value, name) => <div className="flex flex-1 justify-between gap-4"><span className="text-muted-foreground">{chartConfig[name as keyof typeof chartConfig].label}</span><span className="font-medium tabular-nums">{money(Number(value), currency, locale)}</span></div>} />} /><ChartLegend content={<ChartLegendContent />} /><Bar dataKey="deposited" stackId="total" fill="var(--color-deposited)" isAnimationActive={false} /><Bar dataKey="earned" stackId="total" fill="var(--color-earned)" radius={[4, 4, 0, 0]} isAnimationActive={false} /></BarChart></ChartContainer>
-  </section>}
-  {final && <div><Button variant="outline" onClick={() => set('showTable', !showTable)} aria-expanded={showTable} aria-controls="yearly">{showTable ? t("Hide") : t("View")} {t("yearly breakdown")} </Button>{showTable && <div id="yearly" className="mt-6 rounded-xl border"><Table><TableHeader><TableRow><TableHead> {t("Year")} </TableHead><TableHead> {t("Contributions")} </TableHead><TableHead> {t("Interest")} </TableHead><TableHead> {t("Total contributions")} </TableHead><TableHead> {t("Interest earned")} </TableHead><TableHead> {t("Balance")} </TableHead></TableRow></TableHeader><TableBody>{yearly.map(row => <TableRow key={row.year}><TableCell>{row.year}</TableCell><TableCell>{money(row.contribution, currency, locale)}</TableCell><TableCell>{money(row.interest, currency, locale)}</TableCell><TableCell>{money(row.deposited, currency, locale)}</TableCell><TableCell>{money(row.earned, currency, locale)}</TableCell><TableCell>{money(row.balance, currency, locale)}</TableCell></TableRow>)}</TableBody></Table></div>}</div>}
+      <AmountField label={t("Monthly contribution")} value={monthly} onChange={value => set('monthly', value)} currency={currency} quick={currency === 'USD' ? [100, 250, 500] : [1000, 2000, 5000]} hint={t("Added at the end of each month.")} />
+      <FieldGroup>
+        <NumberField label={t("Initial deposit")} suffix={currency} value={initial} onChange={value => set('initial', value)} />
+        <div className="grid items-end gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"><NumberField label={t("Annual interest rate")} value={rate} onChange={value => set('rate', value)} max={100} suffix="%" /><NumberField label={t("Years")} value={years} onChange={value => set('years', value)} min={1} max={60} step={1} /></div>
+        <p className="text-xs leading-5 text-muted-foreground"> {t("Illustrative default, not a market rate. Enter the nominal annual rate before taxes and inflation.")} </p>
+      </FieldGroup>
+      <Settings title={t("Compounding frequency")} summary={frequency}>
+        <Field><FieldLabel className="sr-only"> {t("Compounding frequency")} </FieldLabel><ToggleGroup type="single" value={compounding} onValueChange={value => { if (value) set('compounding', value as typeof compounding); }} variant="outline" className="w-full" aria-label={t("Compounding frequency")}>{([['365', t("Daily")], ['12', t("Monthly")], ['1', t("Annually")]] as const).map(([value, label]) => <ToggleGroupItem key={value} value={value} className="h-auto min-h-11 flex-1 whitespace-normal py-2 text-center">{label}</ToggleGroupItem>)}</ToggleGroup><FieldDescription> {t("How often your institution adds interest to the balance.")} </FieldDescription></Field>
+      </Settings>
+      <div className="mt-auto flex flex-col items-start gap-3 border-t pt-5"><p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"><ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0" size={16} /> {t("Inputs saved on this device.")} </p><Button variant="ghost" size="sm" onClick={reset}><RotateCcw aria-hidden="true" /> {t("Reset calculator")} </Button></div>
+    </aside>
+    <section className="tool-pane-result" aria-label={t("Savings result")}>
+      <div className="flex flex-col gap-8">
+        {final ? <>
+          <div className="grid gap-8 @3xl:grid-cols-2 @3xl:items-start">
+            <div className="flex flex-col gap-6">
+              <div ref={headlineRef} className="scroll-mt-28" aria-live="polite" aria-atomic="true"><h2 className="meta">{headline}</h2><p className="result-value mt-1">{shown}</p><p className="text-xs text-muted-foreground">{currency} · {t("before taxes and inflation")}</p></div>
+              <Receipt segments={[{ label: t("Initial deposit"), value: start, color: 'var(--glow-3)' }, { label: t("Monthly contributions"), value: roundMoney(final.deposited - start), color: 'var(--glow-2)' }, { label: t("Interest earned"), value: final.earned, color: 'var(--glow-1)' }]} />
+              <p className="text-xs leading-5 text-muted-foreground"> {t("Estimates assume a constant rate, no withdrawals, fees, or taxes on interest. Changing currency changes the label, not the exchange value.")} </p>
+            </div>
+            <div className="result-panel gap-4"><h3 className="meta">{t("Breakdown")}</h3><Receipt
+              lines={[{ label: t("Initial deposit"), value: money(start, currency, locale) }, { sign: '+', label: t("Monthly contributions"), value: money(roundMoney(final.deposited - start), currency, locale) }, { sign: '+', label: t("Interest earned"), value: money(final.earned, currency, locale) }, { sign: '=', label: t("Final balance"), value: money(final.balance, currency, locale) }]}
+              formula={[`i = (1 + ${Number(rate)}% ÷ ${n})^(${n} ÷ 12) − 1 = ${new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { style: 'percent', maximumFractionDigits: 4 }).format(Math.expm1(n / 12 * Math.log1p(r / n)))}`]} /></div>
+          </div>
+          <Insights items={insights} />
+          <section aria-labelledby="growth-heading"><h2 id="growth-heading" className="font-medium"> {t("Growth over time")} </h2><p className="mt-1 mb-5 text-sm text-muted-foreground"> {t("What you put in versus what interest adds, at the end of each year.")} </p>
+            <ChartContainer config={chartConfig} className="h-72 w-full" role="img" aria-label={t("Stacked bar chart of contributions and interest by year. The yearly breakdown table has the same values.")}><BarChart data={yearly} accessibilityLayer><CartesianGrid vertical={false} /><XAxis dataKey="year" tickLine={false} axisLine={false} /><YAxis width={72} tickLine={false} axisLine={false} tickFormatter={value => new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { notation: 'compact' }).format(value)} /><ChartTooltip content={<ChartTooltipContent labelFormatter={(_, payload) => t('Year {year}', { year: payload[0]?.payload.year })} formatter={(value, name) => <div className="flex flex-1 justify-between gap-4"><span className="text-muted-foreground">{chartConfig[name as keyof typeof chartConfig].label}</span><span className="font-medium tabular-nums">{money(Number(value), currency, locale)}</span></div>} />} /><ChartLegend content={<ChartLegendContent />} /><Bar dataKey="deposited" stackId="total" fill="var(--color-deposited)" isAnimationActive={false} /><Bar dataKey="earned" stackId="total" fill="var(--color-earned)" radius={[4, 4, 0, 0]} isAnimationActive={false} /></BarChart></ChartContainer>
+          </section>
+          <div className="flex flex-wrap gap-3"><Button variant="outline" onClick={() => set('showTable', !showTable)} aria-expanded={showTable} aria-controls="yearly">{showTable ? t("Hide") : t("View")} {t("yearly breakdown")} </Button><Button variant="outline" onClick={exportCSV}><Download data-icon="inline-start" /> {t("Download monthly breakdown")} </Button></div>
+          {showTable && <div id="yearly" className="rounded-xl border"><Table><TableHeader><TableRow><TableHead> {t("Year")} </TableHead><TableHead> {t("Contributions")} </TableHead><TableHead> {t("Interest")} </TableHead><TableHead> {t("Total contributions")} </TableHead><TableHead> {t("Interest earned")} </TableHead><TableHead> {t("Balance")} </TableHead></TableRow></TableHeader><TableBody>{yearly.map(row => <TableRow key={row.year}><TableCell>{row.year}</TableCell><TableCell>{money(row.contribution, currency, locale)}</TableCell><TableCell>{money(row.interest, currency, locale)}</TableCell><TableCell>{money(row.deposited, currency, locale)}</TableCell><TableCell>{money(row.earned, currency, locale)}</TableCell><TableCell>{money(row.balance, currency, locale)}</TableCell></TableRow>)}</TableBody></Table></div>}
+        </> : <Alert variant="destructive"><AlertTitle> {t("Check your numbers")} </AlertTitle><AlertDescription>{t(error)}</AlertDescription></Alert>}
+      </div>
+    </section>
+    <MobileResult label={headline} value={shown} inputs={inputs} result={headlineRef} />
   </div>;
 }
 
