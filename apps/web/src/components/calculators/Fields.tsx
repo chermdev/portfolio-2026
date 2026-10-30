@@ -4,7 +4,6 @@ import { useEffect, useId, useState, type ReactNode, type RefObject } from 'reac
 import { ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { Input } from '@portfolio/ui/components/input';
 import { Button } from '@portfolio/ui/components/button';
-import { Badge } from '@portfolio/ui/components/badge';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@portfolio/ui/components/collapsible';
 import { Field, FieldLabel, FieldDescription, FieldError } from '@portfolio/ui/components/field';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '@portfolio/ui/components/select';
@@ -29,7 +28,7 @@ export function AmountField({ label, value, onChange, currency, quick = [], hint
   const invalid = isAmountInvalid(value);
   return <Field data-invalid={invalid || undefined}><FieldLabel htmlFor={id}>{label}</FieldLabel>
     <div className="amount-field"><input id={id} className="amount-input" type="number" inputMode="decimal" min={0} max={1e9} step={0.01} value={value} onChange={event => onChange(event.target.value)} aria-invalid={invalid} aria-describedby={invalid ? `${id}-error` : hint ? `${id}-hint` : undefined} /><span className="meta">{currency}</span></div>
-    {quick.length > 0 && <div className="flex flex-wrap gap-2" role="group" aria-label={t("Quick amounts")}>{quick.map(amount => <Button key={amount} type="button" size="sm" variant={Number(value) === amount ? 'secondary' : 'outline'} className="rounded-full" aria-pressed={Number(value) === amount} onClick={() => onChange(String(amount))}>{new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount)}</Button>)}</div>}
+    {quick.length > 0 && <div className="flex flex-wrap gap-2" role="group" aria-label={t("Quick amounts")}>{quick.map(amount => <Button key={amount} type="button" size="sm" variant={Number(value) === amount ? 'secondary' : 'outline'} className="h-11 rounded-full sm:h-8" aria-pressed={Number(value) === amount} onClick={() => onChange(String(amount))}>{new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount)}</Button>)}</div>}
     {hint && <FieldDescription id={`${id}-hint`}>{hint}</FieldDescription>}
     {invalid && <FieldError id={`${id}-error`}>{t('Enter a number from {min} to {max}{step}.', { min: 0, max: 1e9, step: '' })}</FieldError>}</Field>;
 }
@@ -38,7 +37,7 @@ export function Settings({ title, summary, edited, children }: { title: string; 
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return <Collapsible open={open} onOpenChange={setOpen} className="rounded-xl border">
-    <CollapsibleTrigger className="group flex min-h-14 w-full items-center gap-3 rounded-xl px-4 py-3 text-left"><SlidersHorizontal aria-hidden="true" className="shrink-0" size={18} strokeWidth={1.5} /><span className="flex min-w-0 flex-col"><span className="flex items-center gap-2 font-medium">{title}{edited && <Badge variant="secondary">{t("Edited")}</Badge>}</span><span className="meta truncate">{summary}</span></span><ChevronDown aria-hidden="true" className="ml-auto shrink-0 transition-transform duration-150 group-data-[state=open]:rotate-180" size={18} strokeWidth={1.5} /></CollapsibleTrigger>
+    <CollapsibleTrigger className="group flex min-h-14 w-full items-center gap-3 rounded-xl px-4 py-3 text-left"><SlidersHorizontal aria-hidden="true" className="shrink-0" size={18} strokeWidth={1.5} /><span className="flex min-w-0 flex-col"><span className="font-medium">{title}</span><span className="meta line-clamp-2">{edited && <span className="text-foreground">{t("Edited")} · </span>}{summary}</span></span><ChevronDown aria-hidden="true" className="ml-auto shrink-0 transition-transform duration-150 group-data-[state=open]:rotate-180" size={18} strokeWidth={1.5} /></CollapsibleTrigger>
     <CollapsibleContent className="border-t px-4 py-5">{children}</CollapsibleContent>
   </Collapsible>;
 }
@@ -69,9 +68,11 @@ export function MobileResult({ label, value, inputs, result }: { label: string; 
     return () => observer.disconnect();
   }, [inputs, result]);
   const visible = state.inputs && !state.result;
-  return <div className="mobile-result lg:hidden" data-visible={visible} aria-hidden={!visible}><div className="min-w-0"><p className="meta">{label}</p><p className="truncate text-xl font-medium tabular-nums">{value}</p></div><Button size="sm" variant="outline" tabIndex={visible ? 0 : -1} onClick={() => result.current?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' })}>{t("See breakdown")}</Button></div>;
+  return <div className="mobile-result lg:hidden" data-visible={visible} aria-hidden={!visible}><div className="min-w-0"><p className="meta">{label}</p><p className="truncate text-xl font-medium tabular-nums">{value}</p></div><Button size="sm" variant="outline" className="h-11" tabIndex={visible ? 0 : -1} onClick={() => { const target = result.current; if (!target) return; target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); target.tabIndex = -1; target.focus({ preventScroll: true }); }}>{t("See breakdown")}</Button></div>;
 }
 /** Extra answers derived from the same inputs, so the result says more than one number. */
 export function Insights({ items }: { items: { label: string; value: string }[] }) {
-  return <dl className="grid gap-3 @xl:grid-cols-3">{items.map(item => <div key={item.label} className="rounded-xl border bg-card p-4"><dt className="text-xs leading-5 text-muted-foreground">{item.label}</dt><dd className="mt-1 text-lg font-medium tabular-nums">{item.value}</dd></div>)}</dl>;
+  // Cards in a row stretch to the same height and the value sits at the bottom, so values line up when a label wraps.
+  // Four cards go 2×2 instead of leaving one alone on a second row.
+  return <dl className={items.length === 4 ? "grid gap-3 @xl:grid-cols-2" : "grid gap-3 @xl:grid-cols-3"}>{items.map(item => <div key={item.label} className="flex flex-col rounded-xl border bg-card p-4"><dt className="text-xs leading-5 text-muted-foreground">{item.label}</dt><dd className="mt-auto pt-1 text-lg font-medium tabular-nums">{item.value}</dd></div>)}</dl>;
 }

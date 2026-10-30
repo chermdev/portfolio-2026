@@ -156,7 +156,7 @@
   .section-heading { font-size: var(--font-heading); line-height: 1.07; letter-spacing: var(--tracking-display); font-weight: 500; }
   .subheading { font-size: var(--font-subheading); line-height: 1.2; letter-spacing: -0.045em; font-weight: 500; }
   .lead { font-size: var(--font-lead); line-height: 1.8; color: var(--muted-foreground); max-width: 42ch; }
-  .nav-link { @apply text-sm text-muted-foreground hover:text-foreground; padding: 0.75rem 1rem; }
+  .nav-link { @apply whitespace-nowrap text-sm text-muted-foreground hover:text-foreground; padding: 0.75rem 1rem; }
   .nav-link[aria-current=page] { @apply bg-card text-foreground rounded-full; box-shadow: var(--shadow-surface); }
   .text-link { @apply inline-flex items-center gap-2 text-sm font-medium underline-offset-4 hover:underline; min-height: 2.75rem; }
   .display { font-size: var(--font-display); line-height: 1.015; letter-spacing: var(--tracking-display); font-weight: 500; }
@@ -178,7 +178,7 @@
   .result-value { /* Sized by the panel, not the viewport, so long amounts stay on one line. */ font-size: clamp(1.75rem, 11cqi, 3.8rem); line-height: 1.1; letter-spacing: -0.06em; font-weight: 500; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
   /* Tool pages: one large primary amount, a receipt-style result, and a result bar on small screens. */
   .amount-field { @apply flex items-baseline gap-3 border-b-2 pb-1 transition-colors duration-150; }
-  .amount-field:focus-within { border-color: var(--ring); }
+  .amount-field:focus-within { border-color: var(--foreground); }
   .amount-input { @apply w-full min-w-0 bg-transparent outline-none; font-size: clamp(2rem, 5vw, 2.75rem); line-height: 1.2; letter-spacing: -0.04em; font-weight: 500; font-variant-numeric: tabular-nums; appearance: textfield; }
   .amount-input::-webkit-inner-spin-button, .amount-input::-webkit-outer-spin-button { appearance: none; margin: 0; }
   .receipt { @apply text-sm; }
@@ -189,7 +189,7 @@
   .receipt-bar { @apply flex h-2.5 gap-0.5 overflow-hidden rounded-full; }
   .receipt-bar > span { min-width: 3px; }
   .receipt-formula { @apply rounded-lg bg-background/70 px-3 py-2 font-mono text-xs leading-6 text-muted-foreground; }
-  .mobile-result { @apply fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-4 border-t bg-background/90 px-5 py-3 backdrop-blur; transition: translate 150ms var(--ease-out); }
+  .mobile-result { @apply fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-4 border-t bg-background/90 py-3 backdrop-blur; padding-inline: var(--page-gutter); transition: translate 150ms var(--ease-out); }
   .mobile-result[data-visible="false"] { translate: 0 100%; }
   @media (prefers-reduced-motion: reduce) { .mobile-result { transition: none; } }
   /* App workspace for tools: it sits in the page column, aligned with the header, as a framed window
@@ -197,8 +197,9 @@
      under the h-24 header, and the page itself scrolls: no inner scroll bars. */
   .tool-app { @apply flex flex-col gap-5 pt-5 pb-6; max-width: var(--layout-max); margin-inline: auto; padding-inline: var(--page-gutter); }
   .tool-toolbar { @apply flex flex-wrap items-center gap-3; }
-  .tool-switcher { @apply order-last flex w-full items-center gap-2 sm:order-none sm:w-auto; }
-  .tool-switcher a { @apply rounded-[0.8rem] p-0.5 opacity-60 outline-none transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring; }
+  /* On small screens the switcher becomes a row of app tabs above the title; from sm up it sits at the right of the toolbar. */
+  .tool-switcher { @apply order-first flex w-full items-center gap-2 border-b pb-3 sm:order-none sm:w-auto sm:border-b-0 sm:pb-0; }
+  .tool-switcher a { @apply rounded-[0.9rem] p-1 opacity-60 outline-none transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring; }
   .tool-switcher a[aria-current="page"] { @apply opacity-100 ring-2 ring-foreground/20; }
   .tool-workspace { @apply grid overflow-hidden rounded-2xl border; grid-template-columns: minmax(0, 1fr); }
   .tool-pane-inputs { @apply flex flex-col gap-6 border-b bg-secondary/40 p-5 sm:p-6; }
@@ -208,7 +209,8 @@
     .tool-workspace { @apply flex-1; grid-template-columns: 23rem minmax(0, 1fr); }
     .tool-pane-inputs { @apply border-r border-b-0; }
   }
-  .tool-guide { margin: 0 0 0 auto; width: min(34rem, 100vw); max-width: 100vw; height: 100dvh; max-height: 100dvh; @apply overflow-y-auto border-l bg-background p-6 text-foreground sm:p-8; }
+  .tool-guide { margin: 0 0 0 auto; width: min(34rem, 100vw); max-width: 100vw; height: 100dvh; max-height: 100dvh; @apply overflow-y-auto border-l bg-background p-0 text-foreground; }
+  .tool-guide-body { @apply min-h-full p-6 sm:p-8; }
   .tool-guide::backdrop { background: color-mix(in oklab, black 45%, transparent); }
   /* Tool guides: questions open in place with native <details>; no script needed. */
   .faq { @apply border-b; }

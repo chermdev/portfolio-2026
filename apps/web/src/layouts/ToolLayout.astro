@@ -15,18 +15,21 @@ const tool = tools.find(item => Astro.url.pathname.includes(`/tools/${item.slug}
     <div class="tool-app">
       <div class="tool-toolbar">
         {tool && <AppIcon icon={tool.icon} small />}
-        <div class="min-w-0 flex-1"><h1 class="font-medium leading-snug tracking-tight sm:truncate">{title}</h1><nav aria-label="Breadcrumb" class="meta flex min-w-0 items-center gap-2"><a class="hover:text-foreground hover:underline underline-offset-4" href="/tools">Tools</a><span aria-hidden="true">/</span><span>{category}</span>{checked && <span class="hidden truncate sm:inline"><span aria-hidden="true">· </span>{checked}</span>}</nav></div>
+        <div class="min-w-0 flex-1"><h1 class="font-medium leading-snug tracking-tight sm:truncate">{title}</h1><nav aria-label="Breadcrumb" class="meta flex min-w-0 flex-wrap items-center gap-x-2"><a class="-my-2 inline-block whitespace-nowrap py-2 hover:text-foreground hover:underline underline-offset-4" href="/tools">Tools</a><span aria-hidden="true">/</span><span class="whitespace-nowrap">{category}</span>{checked && <span class="hidden whitespace-nowrap lg:inline"><span aria-hidden="true">· </span>{checked}</span>}</nav></div>
         <nav aria-label="Switch tool" class="tool-switcher sm:ml-auto">{tools.map(item => <a href={`/tools/${item.slug}`} aria-label={item.name} title={item.name} aria-current={item.slug === tool?.slug ? 'page' : undefined}><AppIcon icon={item.icon} small /></a>)}</nav>
-        <button type="button" class={buttonVariants({ variant: 'outline', size: 'sm', className: 'ml-auto shrink-0 sm:ml-0' })} data-open-guide aria-haspopup="dialog" aria-controls="tool-guide" aria-label="How it works"><CircleHelp aria-hidden="true" /><span class="hidden sm:inline">How it works</span></button>
+        <button type="button" class={buttonVariants({ variant: 'outline', size: 'sm', className: 'ml-auto h-11 shrink-0 sm:ml-0 sm:h-8' })} data-open-guide aria-haspopup="dialog" aria-controls="tool-guide" aria-label="How it works"><CircleHelp aria-hidden="true" /><span class="hidden sm:inline">How it works</span></button>
       </div>
       <noscript><p class="m-5 rounded-lg border p-5">Enable JavaScript to use the interactive calculator. The formulas and assumptions are explained below.</p></noscript>
       <slot />
     </div>
     <dialog id="tool-guide" class="tool-guide" aria-labelledby="tool-guide-title">
+      <!-- The body fills the panel, so only the backdrop is the <dialog> itself (a click there closes it). -->
+      <div class="tool-guide-body">
       <div class="flex items-center justify-between gap-4 border-b pb-4"><p id="tool-guide-title" class="font-medium">How it works</p><form method="dialog"><button class={buttonVariants({ variant: 'ghost', size: 'icon' })} aria-label="Close"><X aria-hidden="true" /></button></form></div>
       <p class="mt-6 leading-7 text-muted-foreground">{description}</p>
       <div class="mt-8"><slot name="guide" /></div>
       <a class="text-link mt-10" href="/tools"><ArrowLeft aria-hidden="true" size={16} strokeWidth={1.5} /> Explore all tools</a>
+      </div>
     </dialog>
   </> : <>
     <section class="page-shell pt-10 pb-section">

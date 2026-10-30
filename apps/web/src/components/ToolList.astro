@@ -32,17 +32,17 @@ const categories = [...new Set([...tools, ...upcomingTools].map(tool => tool.cat
   <p class="meta mb-4">{category}</p>
   <div class="grid gap-4 sm:grid-cols-2">
     {tools.filter(tool => tool.category === category).map(tool => { const { caption, value } = example(tool.icon); return <a href={`/tools/${tool.slug}`} class="tool-widget group">
-      <div class="flex items-center gap-3">
+      <div class="flex min-h-16 items-center gap-3">
         <AppIcon icon={tool.icon} />
         <div class="min-w-0"><h3 class="font-medium tracking-tight group-hover:underline group-hover:underline-offset-4">{tool.name}</h3><p class="meta">{tool.tag}</p></div>
         <ArrowUpRight aria-hidden="true" className="ml-auto shrink-0" size={18} strokeWidth={1.5} />
       </div>
-      <p class="mt-6 text-xs leading-5 text-muted-foreground">{caption}</p>
+      <p class="mt-6 min-h-10 text-xs leading-5 text-muted-foreground">{caption}</p>
       <p class="tool-widget-value">{value}</p>
       <p class="mt-3 text-sm leading-6 text-muted-foreground">{tool.description}</p>
     </a>; })}
     {upcomingTools.filter(tool => tool.category === category).map(tool => <div class="tool-widget border-dashed text-muted-foreground">
-      <div class="flex items-center gap-3"><AppIcon icon={tool.icon} /><div class="min-w-0"><h3 class="font-medium tracking-tight">{tool.name}</h3><p class="meta">{tool.category}</p></div><span class="meta ml-auto shrink-0 rounded-full border px-3 py-1">Coming soon</span></div>
+      <div class="flex min-h-16 items-center gap-3"><AppIcon icon={tool.icon} /><div class="min-w-0"><h3 class="font-medium tracking-tight">{tool.name}</h3><p class="meta">{tool.category}</p></div><span class="meta ml-auto shrink-0 rounded-full border px-3 py-1">Coming soon</span></div>
       <p class="mt-6 text-sm leading-6">{tool.description}</p>
     </div>)}
   </div>
