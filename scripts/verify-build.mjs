@@ -17,7 +17,7 @@ async function check(file){
  if(buffer.readUInt32BE(16)!==1200||buffer.readUInt32BE(20)!==630)throw Error('Wrong image dimensions');
  if((html.match(/<h1(?:\s|>)/g)||[]).length!==1)throw Error(`${file}: expected one h1`);
  if(!html.includes('rel="canonical"'))throw Error(`${file}: missing canonical`);
- if(file.includes('/tools/')&&!file.endsWith('/tools/index.html')&&!html.includes('FinanceApplication'))throw Error(`${file}: missing tool structured data`);
+ if(file.includes('/tools/')&&!file.endsWith('/tools/index.html')&&!/"applicationCategory":"(Finance|Multimedia)Application"/.test(html))throw Error(`${file}: missing tool structured data`);
  const appDir=file.slice(0,file.indexOf('/dist/'))+'/dist';
  for(const match of html.matchAll(/(?:href|src)="(\/[^"#?]*)(?:[?#][^"]*)?"/g)){
   const value=match[1];if(value.startsWith('//')||value.startsWith('/_astro/'))continue;

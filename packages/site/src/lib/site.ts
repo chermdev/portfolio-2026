@@ -9,12 +9,11 @@ export const tools = [
   { category: 'Finance', slug: 'auto-loan-calculator', name: 'Auto loan calculator', description: 'Find your monthly payment, or the car that fits your budget.', tag: 'Auto finance', icon: 'car' },
   { category: 'Finance', slug: 'mortgage-calculator', name: 'Mortgage calculator', description: 'Explore your monthly payment and how much home you can afford.', tag: 'Home finance', icon: 'home' },
   { category: 'Finance', slug: 'compound-interest-calculator', name: 'Compound interest calculator', description: 'See how your savings could grow with regular contributions.', tag: 'Savings', icon: 'savings' },
+  { category: 'Media', slug: 'image-compressor', name: 'Image compressor', description: 'Shrink, convert, crop, and resize images. Files never leave your device.', tag: 'Images', icon: 'image' },
+  { category: 'Media', slug: 'video-compressor', name: 'Video compressor', description: 'Trim, crop, rotate, and compress video in your browser. No uploads.', tag: 'Video', icon: 'video' },
 ] as const;
 // ponytail: planned tools are listed so visitors see where the toolbox is going; remove an entry once it ships in `tools`.
-export const upcomingTools = [
-  { name: 'Image compressor', description: 'Shrink images in your browser. Files never leave your device.', category: 'Media', icon: 'image' },
-  { name: 'Video compressor', description: 'Compress video locally with WebCodecs. No uploads.', category: 'Media', icon: 'video' },
-] as const;
+export const upcomingTools: readonly { name: string; description: string; category: string; icon: string }[] = [];
 const repo = (name: string) => `https://github.com/chermdev/${name}`;
 // Projects with an `image` (a screenshot in apps/web/src/assets/projects) get a visual card; the rest are listed as rows.
 export const projects = [

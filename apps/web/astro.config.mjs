@@ -10,5 +10,5 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   site: process.env.PUBLIC_SITE_URL || 'https://portfolio.example',
   integrations: [react(), sitemap({ filter: (page) => !page.includes('/system-design') })],
-  vite: { cacheDir: process.env.npm_lifecycle_event === 'build' ? 'node_modules/.vite-build' : 'node_modules/.vite-dev', plugins: [tailwindcss()], ssr: { noExternal: ['@portfolio/i18n', '@portfolio/site', '@portfolio/ui', '@fontsource-variable/manrope'] } },
+  vite: { cacheDir: process.env.npm_lifecycle_event === 'build' ? 'node_modules/.vite-build' : 'node_modules/.vite-dev', plugins: [tailwindcss()], optimizeDeps: { exclude: ['@ffmpeg/ffmpeg'] }, ssr: { noExternal: ['@portfolio/i18n', '@portfolio/site', '@portfolio/ui', '@fontsource-variable/manrope'] } },
 });

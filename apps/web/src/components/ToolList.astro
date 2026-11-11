@@ -22,6 +22,9 @@ function example(icon: string) {
     const caption = icon === 'car' ? 'Per month · {price} car, {down}% down, {months} months' : 'Per month · {price} home, {down}% down, {years} years';
     return { caption: t(caption, { price: whole(Number(price), currency), down, months, years: Number(months) / 12 }), value: money(payment, currency, locale) };
   }
+  // Media tools have no default result to compute; they show what they can write instead.
+  if (icon === 'image') return { caption: t('Converts to', {}), value: 'WebP · JPEG · PNG · AVIF' };
+  if (icon === 'video') return { caption: t('Converts to', {}), value: 'MP4 · WebM' };
   const { initial, monthly, rate, years, compounding, currency } = savingsDefaults();
   const rows = savingsGrowth({ initial: Number(initial), monthly: Number(monthly), annualRate: Number(rate), years: Number(years), compounding: Number(compounding) as Compounding });
   return { caption: t('After {years} years · {initial} plus {monthly} a month at {rate}%', { years, initial: whole(Number(initial), currency), monthly: whole(Number(monthly), currency), rate }), value: money(rows.at(-1)!.balance, currency, locale) };

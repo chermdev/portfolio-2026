@@ -11,6 +11,8 @@ export const stripeDefaults = () => ({ currency: 'MXN' as Currency, plan: 'lite'
 export const loanDefaults = (home: boolean) => ({ mode: 'payment' as 'payment' | 'power', price: home ? '2500000' : '450000', budget: home ? '20000' : '8000', currency: 'MXN', down: '20', downType: 'percent' as 'percent' | 'cash', tradeIn: '0', rate: home ? '10.5' : '12', months: home ? '240' : '60', showSchedule: false, deposits: [] as { id: number; month: string; amount: string }[], strategy: 'term' as 'term' | 'payment' });
 export const savingsDefaults = () => ({ currency: 'MXN', initial: '10000', monthly: '2000', rate: '10', years: '10', compounding: '12' as '1' | '12' | '365', showTable: false });
 type Update<T> = T | ((previous: T) => T);
+export const imageDefaults = () => ({ imageFormat: 'image/webp', imageQuality: '80', imageMaxSide: '0' });
+export const videoDefaults = () => ({ videoFormat: 'mp4', videoQuality: 'medium', videoMaxSide: '0', mute: false });
 // Persist inputs only. Derived results are recomputed; each tool has its own key.
 function calculatorStore<T extends object>(name: string, defaults: () => T) {
   return create(persist<{ values: T; set: <K extends keyof T>(key: K, value: Update<T[K]>) => void; reset: () => void }>((set) => ({
@@ -38,7 +40,7 @@ function calculatorStore<T extends object>(name: string, defaults: () => T) {
         }
       }
       const selections = saved as Record<string, unknown>;
-      const choices: Record<string, string[]> = { currency: ['MXN', 'USD'], plan: ['lite', 'standard', 'plus', 'pro'], mode: name.includes('stripe') ? ['charge', 'receive'] : ['payment', 'power'], downType: ['percent', 'cash'], strategy: ['term', 'payment'], compounding: ['1', '12', '365'] };
+      const choices: Record<string, string[]> = { currency: ['MXN', 'USD'], plan: ['lite', 'standard', 'plus', 'pro'], mode: name.includes('stripe') ? ['charge', 'receive'] : ['payment', 'power'], downType: ['percent', 'cash'], strategy: ['term', 'payment'], compounding: ['1', '12', '365'], imageFormat: ['image/webp', 'image/jpeg', 'image/png', 'image/avif'], imageMaxSide: ['0', '3840', '2560', '1920', '1280', '800'], videoFormat: ['mp4', 'webm'], videoQuality: ['low', 'medium', 'high'], videoMaxSide: ['0', '1920', '1280', '854'] };
       for (const [key, allowed] of Object.entries(choices)) if (key in base && !allowed.includes(String(selections[key]))) return current;
       const deposits = (saved as { deposits?: unknown[] }).deposits;
       if (deposits?.some(item => !item || typeof item !== 'object' || typeof (item as {id?:unknown}).id !== 'number' || typeof (item as {month?:unknown}).month !== 'string' || typeof (item as {amount?:unknown}).amount !== 'string')) return current;
@@ -50,6 +52,8 @@ export const useStripeStore = calculatorStore('chermdev:calculator:stripe:v1', s
 export const useAutoStore = calculatorStore('chermdev:calculator:auto:v1', () => loanDefaults(false));
 export const useMortgageStore = calculatorStore('chermdev:calculator:mortgage:v1', () => loanDefaults(true));
 export const useSavingsStore = calculatorStore('chermdev:calculator:savings:v1', savingsDefaults);
-export function useHydrateCalculator(store: typeof useAutoStore | typeof useStripeStore | typeof useSavingsStore) {
+export const useImageStore = calculatorStore('chermdev:tool:image:v1', imageDefaults);
+export const useVideoStore = calculatorStore('chermdev:tool:video:v1', videoDefaults);
+export function useHydrateCalculator(store: { persist: { rehydrate: () => unknown } }) {
   useEffect(() => { void store.persist.rehydrate(); }, [store]);
 }

@@ -1,0 +1,17 @@
+---
+import { localeFromPath } from '@portfolio/i18n';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import VideoCompressor from '../../components/media/VideoCompressor';
+---
+<ToolLayout title="Video compressor" description="Trim, crop, rotate, resize, and compress video in your browser. Files never leave your device." category="Media" image="video" kind="MultimediaApplication" app>
+  <VideoCompressor locale={localeFromPath(Astro.url.pathname)} client:load />
+  <div slot="guide" class="flex flex-col gap-8">
+    <div class="prose-copy"><h2>Compress video on your own device.</h2><p>Add a video, trim it with the handles under the preview, rotate or crop it if you need to, pick a format and compression level, and select Compress video. The file is read and encoded by your browser; nothing is uploaded.</p></div>
+    <div class="faq">
+      <details><summary>Which engine does it use?</summary><div class="prose-copy"><p>It picks the best option for your browser. First it tries WebCodecs through Mediabunny, which uses your device’s hardware encoders and is fast. If your browser can’t decode the file or encode the chosen format, it switches to ffmpeg.wasm. That engine downloads once (about 32 MB), runs on the CPU, and is much slower, but it reads more formats. The result shows which engine was used.</p></div></details>
+      <details><summary>MP4 or WebM?</summary><div class="prose-copy"><p>MP4 with H.264 video plays on almost every phone, computer, and app. WebM with VP9 is usually smaller at the same quality, but some devices and apps can’t play it. You can convert between them, and from formats like MOV, regardless of the original.</p></div></details>
+      <details><summary>How do the edits work?</summary><div class="prose-copy"><p>Edits are applied in this order: trim, rotate, crop, resize, encode. Trimming keeps only the range between the handles. Resize scales the video down so its longest side is at most the chosen size, and never scales up. Sizes are rounded to even numbers, which video encoders require.</p></div></details>
+      <details><summary>What are the limits?</summary><div class="prose-copy"><p>The whole result is kept in memory until you download it, so very long or high-resolution videos may fail, especially on phones. The ffmpeg.wasm engine can’t open files larger than about 2 GB. Subtitles and extra tracks are dropped. Compressing an already compressed video always loses some quality.</p></div></details>
+    </div>
+  </div>
+</ToolLayout>

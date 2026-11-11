@@ -6,11 +6,11 @@ import { site, tools } from '@portfolio/site/lib/site';
 import AppIcon from '../components/AppIcon.astro';
 // `checked` names the date the tool's sources were last verified, shown next to the title.
 // `app` opens the tool as a full-height workspace: a toolbar, the calculator's panes, and the guide in a side drawer.
-interface Props { title: string; description: string; image: string; category: string; checked?: string; app?: boolean; }
-const { title, description, image, category, checked, app = false } = Astro.props;
+interface Props { title: string; description: string; image: string; category: string; checked?: string; app?: boolean; kind?: 'FinanceApplication' | 'MultimediaApplication'; }
+const { title, description, image, category, checked, app = false, kind = 'FinanceApplication' } = Astro.props;
 const tool = tools.find(item => Astro.url.pathname.includes(`/tools/${item.slug}`));
 ---
-<Layout title={title} description={description} image={image} schema={{ '@context': 'https://schema.org', '@type': 'WebApplication', name: title, description, url: new URL(Astro.url.pathname, site.url).href, applicationCategory: 'FinanceApplication', operatingSystem: 'Any', browserRequirements: 'Requires JavaScript', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }, author: { '@type': 'Person', name: 'chermdev', url: site.github } }}>
+<Layout title={title} description={description} image={image} schema={{ '@context': 'https://schema.org', '@type': 'WebApplication', name: title, description, url: new URL(Astro.url.pathname, site.url).href, applicationCategory: kind, operatingSystem: 'Any', browserRequirements: 'Requires JavaScript', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }, author: { '@type': 'Person', name: 'chermdev', url: site.github } }}>
   {app ? <>
     <div class="tool-app">
       <div class="tool-toolbar">
