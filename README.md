@@ -27,6 +27,8 @@ pnpm --filter @portfolio/admin dev # :4324
 - `/tools/auto-loan-calculator`: monthly payments, purchasing power, cash/percentage down payment, trade-in equity, downloadable amortization.
 - `/tools/mortgage-calculator`: both modes, 10–95% down payment in 5% steps, downloadable amortization.
 - `/tools/compound-interest-calculator`: initial deposit, monthly contributions, daily/monthly/annual compounding, growth chart, yearly table, monthly CSV.
+- `/tools/isr-calculator`: monthly ISR withheld from a salary in Mexico, 2026 Art. 96 tariff, editable employment subsidy.
+- `/tools/resico-calculator`: monthly RESICO ISR payment for individuals, company withholding credit, annual-limit warning.
 - Both loan simulators support multiple extra principal deposits, lower-payment or shorter-term strategies, interest savings, and adjusted schedule/CSV totals.
 - `/system-design`: shared color/layout tokens and 61 live official shadcn component previews. The upstream questionnaire entry for the selected style is unavailable.
 - Blog and learning apps, with root-site previews at `/notes` and `/learn`.
@@ -80,5 +82,7 @@ Read [DESIGN.md](DESIGN.md) before UI changes and [AGENTS.md](AGENTS.md) for wor
 Stripe presets were checked against official US/Mexico payment and Radar pricing on September 26, 2026. The UI links to sources. Every fee field is editable. Subscription/account charges, blocked-screening volume, disputes, installments, and refunds are excluded from the per-successful-payment estimate. Pro abuse-event costs can be allocated manually.
 
 The compound interest rate is illustrative, not a market rate. Contributions land at the end of each month; daily and annual compounding use the equivalent monthly rate. Balances above 1 trillion are rejected because cent precision is lost.
+
+The ISR calculator uses the 2026 monthly tariff (Anexo 8 RMF 2026, DOF December 28, 2025) and the employment subsidy decree (DOF December 31, 2025: MXN 535.65 up to MXN 11,492.66), checked November 11, 2026. The subsidy only reduces the tax. IMSS and other payroll deductions are excluded. RESICO uses the Art. 113-E monthly rates on all of the month's income and subtracts the 1.25% Art. 113-J withholding; VAT and the annual return are excluded. Update `isrMonthly2026` and `employmentSubsidy2026` in `packages/calculators` when the SAT publishes new values.
 
 Loan rates are illustrative, not lender quotes. Calculations use fixed nominal annual interest and monthly payments; taxes, insurance, and lender-specific costs are excluded. Totals come from the rounded schedule, which shows the final adjusted installment. Configurations that do not amortize at cent precision are rejected.

@@ -1,0 +1,21 @@
+---
+import { localeFromPath } from '@portfolio/i18n';
+import { resicoMonthly } from '@portfolio/calculators';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@portfolio/ui/components/table';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import ResicoCalculator from '../../components/calculators/ResicoCalculator';
+const locale = localeFromPath(Astro.url.pathname);
+const amount = (value: number) => new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { minimumFractionDigits: 2 }).format(value);
+---
+<ToolLayout title="RESICO calculator" description="Calculate your monthly RESICO ISR payment in Mexico, including the 1.25% withheld by companies." category="Taxes" image="resico" checked="Rates checked November 11, 2026" app>
+  <ResicoCalculator locale={locale} client:load />
+  <div slot="guide" class="flex flex-col gap-8">
+    <div class="prose-copy"><h2>How is the RESICO payment calculated?</h2><p>In the Simplified Trust Regime (RESICO) for individuals, you pay ISR each month on the income you actually collected, with no deductions. The rate depends on how much you collected that month and applies to all of it, not only to the part above a limit. What companies withheld is then subtracted.</p></div>
+    <div class="faq">
+      <details><summary>Which rates apply?</summary><div class="prose-copy"><p>Monthly rates from Article 113-E of the ISR law, in MXN. They are fixed in the law and are not updated for inflation.</p></div>
+        <div class="mt-4 mb-6 rounded-xl border"><Table className="text-xs tabular-nums"><TableHeader><TableRow><TableHead>Monthly income up to</TableHead><TableHead>Rate</TableHead></TableRow></TableHeader><TableBody>{resicoMonthly.map(([max, rate]) => <TableRow><TableCell>{amount(max)}</TableCell><TableCell>{rate}%</TableCell></TableRow>)}</TableBody></Table></div></details>
+      <details><summary>What about company withholdings?</summary><div class="prose-copy"><p>When a company (persona moral) pays you, it withholds 1.25% of the amount before VAT (Article 113-J). That withholding is credited against your monthly ISR. In the 1% band it can be larger than the tax; the calculator shows the difference, which you can apply as your tax advisor indicates.</p></div></details>
+      <details><summary>What is not included?</summary><div class="prose-copy"><p>RESICO only applies while yearly income stays at or below MXN 3.5 million; the calculator warns when twelve months at this pace would exceed it. VAT, the annual return, income from salaries or other regimes, and eligibility rules are not covered. This is an estimate, not tax advice.</p></div></details>
+    </div>
+  </div>
+</ToolLayout>

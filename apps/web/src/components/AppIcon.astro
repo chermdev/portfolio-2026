@@ -1,10 +1,10 @@
 ---
-import { CarFront, House, PiggyBank, Image, Film } from 'lucide-react';
+import { CarFront, House, PiggyBank, Image, Film, Landmark, BriefcaseBusiness } from 'lucide-react';
 interface Props { icon: string; small?: boolean }
 const { icon, small = false } = Astro.props;
-const icons = { car: CarFront, home: House, savings: PiggyBank, image: Image, video: Film };
+const icons = { car: CarFront, home: House, savings: PiggyBank, isr: Landmark, resico: BriefcaseBusiness, image: Image, video: Film };
 // Stripe keeps its brand color and mark; the rest take a --glow-* tint. Upcoming tools have no accent.
-const accents: Record<string, string> = { stripe: '#635bff', car: 'var(--glow-2)', home: 'var(--glow-3)', savings: 'var(--glow-1)', image: 'var(--glow-1)', video: 'var(--glow-3)' };
+const accents: Record<string, string> = { stripe: '#635bff', car: 'var(--glow-2)', home: 'var(--glow-3)', savings: 'var(--glow-1)', isr: 'var(--glow-3)', resico: 'var(--glow-2)', image: 'var(--glow-1)', video: 'var(--glow-3)' };
 const Icon = icons[icon as keyof typeof icons];
 ---
 <span class:list={["app-icon", small && "size-9 rounded-[0.7rem]"]} style={accents[icon] ? `--app: ${accents[icon]}` : undefined}>{icon === 'stripe'

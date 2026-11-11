@@ -173,6 +173,10 @@
   a.tool-widget:hover { border-color: color-mix(in oklab, var(--foreground) 25%, transparent); }
   .app-icon { @apply flex size-11 shrink-0 items-center justify-center rounded-[0.85rem] text-white; background: var(--app); }
   .tool-widget.border-dashed .app-icon { @apply border border-dashed bg-transparent text-muted-foreground; }
+  /* Value-free illustration of what a money tool splits: a donut or bars beside a legend. */
+  .share-chart { @apply flex items-center gap-4; }
+  .share-graphic { @apply size-20 shrink-0; }
+  .share-legend { @apply flex flex-col gap-1.5 text-sm text-muted-foreground; }
   .tool-widget-value { margin-top: 0.25rem; font-size: 1.75rem; line-height: 1.15; letter-spacing: -0.04em; font-weight: 500; font-variant-numeric: tabular-nums; }
   .result-panel { @apply rounded-2xl bg-secondary p-7 flex flex-col gap-6; container-type: inline-size; }
   .result-value { /* Sized by the panel, not the viewport, so long amounts stay on one line. */ font-size: clamp(1.75rem, 11cqi, 3.8rem); line-height: 1.1; letter-spacing: -0.06em; font-weight: 500; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
@@ -209,10 +213,6 @@
     .tool-workspace { @apply flex-1; grid-template-columns: 23rem minmax(0, 1fr); }
     .tool-pane-inputs { @apply border-r border-b-0; }
   }
-  .tool-guide { margin: 0 0 0 auto; width: min(34rem, 100vw); max-width: 100vw; height: 100dvh; max-height: 100dvh; @apply overflow-y-auto border-l bg-background p-0 text-foreground; }
-  .tool-guide-body { @apply min-h-full p-6 sm:p-8; }
-  .tool-guide::backdrop { background: color-mix(in oklab, black 45%, transparent); }
-  /* Tool guides: questions open in place with native <details>; no script needed. */
   /* Media tools: a drop target for files, and a stage that shows a frame with a crop box over it.
      The crop box is positioned in percentages of the frame, so it follows the canvas at any size. */
   .dropzone { @apply flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-background p-5 text-center text-sm text-muted-foreground transition-colors duration-150 hover:border-foreground/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring data-[active=true]:border-foreground data-[active=true]:bg-secondary; }
@@ -225,6 +225,10 @@
   .crop-box::after { border-block-width: 1px; inset-block: 33.333%; }
   /* The visible handle is small; the hit area is 44px. */
   .crop-handle { @apply absolute z-10 flex size-11 touch-none items-center justify-center -translate-x-1/2 -translate-y-1/2 after:size-3.5 after:rounded-full after:border-2 after:border-white after:bg-foreground after:content-['']; }
+  .tool-guide { margin: 0 0 0 auto; width: min(34rem, 100vw); max-width: 100vw; height: 100dvh; max-height: 100dvh; @apply overflow-y-auto border-l bg-background p-0 text-foreground; }
+  .tool-guide-body { @apply min-h-full p-6 sm:p-8; }
+  .tool-guide::backdrop { background: color-mix(in oklab, black 45%, transparent); }
+  /* Tool guides: questions open in place with native <details>; no script needed. */
   .faq { @apply border-b; }
   .faq details { @apply border-t; }
   .faq summary { @apply flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-lg font-medium tracking-tight; }

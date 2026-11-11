@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { useEffect } from 'react';
-import { stripePresets, type Currency, type RadarPlan, type FeeConfig } from '@portfolio/calculators';
+import { stripePresets, employmentSubsidy2026, type Currency, type RadarPlan, type FeeConfig } from '@portfolio/calculators';
 export type Draft = Record<keyof FeeConfig, string>;
 export function feeDefaults(currency: Currency, plan: RadarPlan): Draft {
   const p = stripePresets[currency];
@@ -10,9 +10,11 @@ export function feeDefaults(currency: Currency, plan: RadarPlan): Draft {
 export const stripeDefaults = () => ({ currency: 'MXN' as Currency, plan: 'lite' as RadarPlan, draft: feeDefaults('MXN', 'lite'), international: false, conversion: false, mode: 'charge', amount: '1000' });
 export const loanDefaults = (home: boolean) => ({ mode: 'payment' as 'payment' | 'power', price: home ? '2500000' : '450000', budget: home ? '20000' : '8000', currency: 'MXN', down: '20', downType: 'percent' as 'percent' | 'cash', tradeIn: '0', rate: home ? '10.5' : '12', months: home ? '240' : '60', showSchedule: false, deposits: [] as { id: number; month: string; amount: string }[], strategy: 'term' as 'term' | 'payment' });
 export const savingsDefaults = () => ({ currency: 'MXN', initial: '10000', monthly: '2000', rate: '10', years: '10', compounding: '12' as '1' | '12' | '365', showTable: false });
-type Update<T> = T | ((previous: T) => T);
+export const isrDefaults = () => ({ salary: '20000', subsidy: String(employmentSubsidy2026.amount), cap: String(employmentSubsidy2026.cap) });
+export const resicoDefaults = () => ({ income: '40000', companies: '0', retention: '1.25' });
 export const imageDefaults = () => ({ imageFormat: 'image/webp', imageQuality: '80', imageMaxSide: '0' });
 export const videoDefaults = () => ({ videoFormat: 'mp4', videoQuality: 'medium', videoMaxSide: '0', mute: false });
+type Update<T> = T | ((previous: T) => T);
 // Persist inputs only. Derived results are recomputed; each tool has its own key.
 function calculatorStore<T extends object>(name: string, defaults: () => T) {
   return create(persist<{ values: T; set: <K extends keyof T>(key: K, value: Update<T[K]>) => void; reset: () => void }>((set) => ({
@@ -52,6 +54,8 @@ export const useStripeStore = calculatorStore('chermdev:calculator:stripe:v1', s
 export const useAutoStore = calculatorStore('chermdev:calculator:auto:v1', () => loanDefaults(false));
 export const useMortgageStore = calculatorStore('chermdev:calculator:mortgage:v1', () => loanDefaults(true));
 export const useSavingsStore = calculatorStore('chermdev:calculator:savings:v1', savingsDefaults);
+export const useIsrStore = calculatorStore('chermdev:calculator:isr:v1', isrDefaults);
+export const useResicoStore = calculatorStore('chermdev:calculator:resico:v1', resicoDefaults);
 export const useImageStore = calculatorStore('chermdev:tool:image:v1', imageDefaults);
 export const useVideoStore = calculatorStore('chermdev:tool:video:v1', videoDefaults);
 export function useHydrateCalculator(store: { persist: { rehydrate: () => unknown } }) {

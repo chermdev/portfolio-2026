@@ -3,45 +3,59 @@ import { ArrowUpRight } from 'lucide-react';
 import AppIcon from './AppIcon.astro';
 import { tools, upcomingTools } from '@portfolio/site/lib/site';
 import { localeFromPath, translate } from '@portfolio/i18n';
-import { stripeFees, loanScenario, savingsGrowth, type Compounding, type FeeConfig } from '@portfolio/calculators';
-import { stripeDefaults, loanDefaults, savingsDefaults } from '../stores/calculators';
-import { money } from './calculators/Fields';
+import { stripeFees, loanScenario, savingsGrowth, salaryIsr, resicoTax, type Compounding, type FeeConfig } from '@portfolio/calculators';
+import { stripeDefaults, loanDefaults, savingsDefaults, isrDefaults, resicoDefaults } from '../stores/calculators';
+import { ShareDonut, ShareBars, type SharePart } from '@portfolio/ui/components/share-chart';
 const locale = localeFromPath(Astro.url.pathname);
-const whole = (value: number, currency: string) => new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
 const t = (text: string, values: Record<string, string | number>) => translate(text, locale, values);
-// Each widget shows the result its tool opens with, computed from the same defaults so the two never disagree.
-function example(icon: string) {
+// Money tools illustrate what their result splits into, without numbers, so the card never reads as a price.
+// Proportions come from each tool's own defaults, so the shape still matches what the tool opens with.
+const keep = 'var(--glow-2)', cost = 'var(--glow-1)';
+function example(icon: string): { parts: SharePart[]; steps?: number[][] } | { caption: string; value: string } {
   if (icon === 'stripe') {
-    const { currency, draft, amount } = stripeDefaults();
+    const { draft, amount } = stripeDefaults();
     const config = { ...Object.fromEntries(Object.entries(draft).map(([key, value]) => [key, Number(value)])), international: 0, conversion: 0 } as FeeConfig;
-    return { caption: t('You receive from a {amount} charge', { amount: whole(Number(amount), currency) }), value: money(stripeFees(Number(amount), config).net, currency, locale) };
+    const { net, fee } = stripeFees(Number(amount), config);
+    return { parts: [{ label: t('What you receive', {}), value: net, color: keep }, { label: t('Stripe fees', {}), value: fee, color: cost }] };
   }
   if (icon === 'car' || icon === 'home') {
-    const { price, down, rate, months, currency } = loanDefaults(icon === 'home');
-    const { payment } = loanScenario({ mode: 'payment', amount: Number(price), annualRate: Number(rate), months: Number(months), down: Number(down), downType: 'percent', tradeIn: 0 });
-    const caption = icon === 'car' ? 'Per month · {price} car, {down}% down, {months} months' : 'Per month · {price} home, {down}% down, {years} years';
-    return { caption: t(caption, { price: whole(Number(price), currency), down, months, years: Number(months) / 12 }), value: money(payment, currency, locale) };
+    const { price, down, rate, months } = loanDefaults(icon === 'home');
+    const { principal, interest } = loanScenario({ mode: 'payment', amount: Number(price), annualRate: Number(rate), months: Number(months), down: Number(down), downType: 'percent', tradeIn: 0 });
+    return { parts: [{ label: t('What you borrow', {}), value: principal, color: keep }, { label: t('Interest', {}), value: interest, color: cost }] };
+  }
+  if (icon === 'isr') {
+    const { salary, subsidy, cap } = isrDefaults();
+    const { net, withheld } = salaryIsr(Number(salary), { amount: Number(subsidy), cap: Number(cap) });
+    return { parts: [{ label: t('Your take-home pay', {}), value: net, color: keep }, { label: t('ISR withheld', {}), value: withheld, color: cost }] };
+  }
+  if (icon === 'resico') {
+    const { income, companies, retention } = resicoDefaults();
+    const { tax } = resicoTax(Number(income), Number(companies), Number(retention));
+    return { parts: [{ label: t('What you keep', {}), value: Number(income) - tax, color: keep }, { label: t('ISR for the month', {}), value: tax, color: cost }] };
   }
   // Media tools have no default result to compute; they show what they can write instead.
   if (icon === 'image') return { caption: t('Converts to', {}), value: 'WebP · JPEG · PNG · AVIF' };
   if (icon === 'video') return { caption: t('Converts to', {}), value: 'MP4 · WebM' };
-  const { initial, monthly, rate, years, compounding, currency } = savingsDefaults();
+  const { initial, monthly, rate, years, compounding } = savingsDefaults();
   const rows = savingsGrowth({ initial: Number(initial), monthly: Number(monthly), annualRate: Number(rate), years: Number(years), compounding: Number(compounding) as Compounding });
-  return { caption: t('After {years} years · {initial} plus {monthly} a month at {rate}%', { years, initial: whole(Number(initial), currency), monthly: whole(Number(monthly), currency), rate }), value: money(rows.at(-1)!.balance, currency, locale) };
+  // Five evenly spaced moments: what was deposited so far versus the interest it has earned.
+  const steps = [1, 2, 3, 4, 5].map(step => rows[Math.round(rows.length * step / 5) - 1]).map(row => { const deposited = Number(initial) + Number(monthly) * row.month; return [deposited, row.balance - deposited]; });
+  return { parts: [{ label: t('What you save', {}), value: 0, color: keep }, { label: t('What it earns', {}), value: 0, color: cost }], steps };
 }
 const categories = [...new Set([...tools, ...upcomingTools].map(tool => tool.category))];
 ---
 <div class="flex flex-col gap-10">{categories.map(category => <section aria-label={category}>
   <p class="meta mb-4">{category}</p>
   <div class="grid gap-4 sm:grid-cols-2">
-    {tools.filter(tool => tool.category === category).map(tool => { const { caption, value } = example(tool.icon); return <a href={`/tools/${tool.slug}`} class="tool-widget group">
+    {tools.filter(tool => tool.category === category).map(tool => { const shown = example(tool.icon); return <a href={`/tools/${tool.slug}`} class="tool-widget group">
       <div class="flex min-h-16 items-center gap-3">
         <AppIcon icon={tool.icon} />
         <div class="min-w-0"><h3 class="font-medium tracking-tight group-hover:underline group-hover:underline-offset-4">{tool.name}</h3><p class="meta">{tool.tag}</p></div>
         <ArrowUpRight aria-hidden="true" className="ml-auto shrink-0" size={18} strokeWidth={1.5} />
       </div>
-      <p class="mt-6 min-h-10 text-xs leading-5 text-muted-foreground">{caption}</p>
-      <p class="tool-widget-value">{value}</p>
+      {'parts' in shown
+        ? shown.steps ? <ShareBars className="mt-6" parts={shown.parts} steps={shown.steps} /> : <ShareDonut className="mt-6" parts={shown.parts} />
+        : <><p class="mt-6 min-h-10 text-xs leading-5 text-muted-foreground">{shown.caption}</p><p class="tool-widget-value">{shown.value}</p></>}
       <p class="mt-3 text-sm leading-6 text-muted-foreground">{tool.description}</p>
     </a>; })}
     {upcomingTools.filter(tool => tool.category === category).map(tool => <div class="tool-widget border-dashed text-muted-foreground">

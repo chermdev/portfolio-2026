@@ -146,3 +146,48 @@ export function savingsGrowth(input: { initial: number; monthly: number; annualR
   }
   return rows;
 }
+/** Monthly ISR tariff, Art. 96 LISR, Anexo 8 RMF 2026 (DOF 28 Dec 2025): [lower limit, fixed fee, % on the excess]. */
+export const isrMonthly2026 = [
+  [0.01, 0, 1.92], [844.6, 16.22, 6.4], [7168.52, 420.95, 10.88], [12598.03, 1011.68, 16], [14644.65, 1339.14, 17.92],
+  [17533.65, 1856.84, 21.36], [35362.84, 5665.16, 23.52], [55736.69, 10457.09, 30], [106410.51, 25659.23, 32],
+  [141880.67, 37009.69, 34], [425642, 133488.54, 35],
+] as const;
+/** Employment subsidy decree (DOF 31 Dec 2025): 15.02% of the 2026 monthly UMA (3,566.22), February–December. */
+export const employmentSubsidy2026 = { amount: 535.65, cap: 11492.66 };
+/** Monthly ISR withheld from a salary. The subsidy only reduces the tax; it is never paid out as cash. */
+export function salaryIsr(amount: number, subsidy: { amount: number; cap: number }) {
+  finiteRange(amount, 0, 1e9, 'Income');
+  // Bands are defined in cents; round first so the band and the displayed amount agree.
+  const income = roundMoney(amount);
+  finiteRange(subsidy.amount, 0, 1e6, 'Employment subsidy');
+  finiteRange(subsidy.cap, 0, 1e9, 'Subsidy cap');
+  const row = [...isrMonthly2026].reverse().find(([lower]) => income >= lower);
+  if (!row) return { income, lower: 0, fixed: 0, rate: 0, tax: 0, subsidy: 0, withheld: 0, net: roundMoney(income) };
+  const [lower, fixed, rate] = row;
+  const tax = roundMoney(fixed + (income - lower) * rate / 100);
+  const applied = income <= subsidy.cap ? Math.min(roundMoney(subsidy.amount), tax) : 0;
+  const withheld = roundMoney(tax - applied);
+  return { income: roundMoney(income), lower, fixed, rate, tax, subsidy: applied, withheld, net: roundMoney(income - withheld) };
+}
+/** RESICO individuals, Art. 113-E LISR: [monthly income up to, rate %]. The rate applies to all of the month's income, not just the excess. */
+export const resicoMonthly = [[25000, 1], [50000, 1.1], [83333.33, 1.5], [208333.33, 2], [3500000, 2.5]] as const;
+/** RESICO stops applying once yearly income exceeds this amount. */
+export const resicoAnnualLimit = 3500000;
+export function resicoTax(amount: number, paid: number, retention: number) {
+  finiteRange(amount, 0, 1e9, 'Income');
+  finiteRange(paid, 0, 1e9, 'Income from companies');
+  const income = roundMoney(amount), companies = roundMoney(paid);
+  finiteRange(retention, 0, 100, 'Withholding rate');
+  if (companies > income) throw new Error('Income from companies cannot exceed total income.');
+  const index = resicoMonthly.findIndex(([max]) => income <= max);
+  // Above 3.5 million the regime no longer applies; keep the top rate and let the caller flag the annual limit.
+  const band = index === -1 ? resicoMonthly.length - 1 : index;
+  const rate = resicoMonthly[band][1];
+  const tax = roundMoney(income * rate / 100);
+  const withheld = roundMoney(companies * retention / 100);
+  return {
+    rate, tax, withheld, payment: roundMoney(Math.max(0, tax - withheld)), credit: roundMoney(Math.max(0, withheld - tax)),
+    // Income still taxed at this rate; null in the top band.
+    headroom: band < resicoMonthly.length - 1 ? roundMoney(resicoMonthly[band][0] - income) : null,
+  };
+}

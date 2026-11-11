@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stripeFees, grossForNet, monthlyPayment, purchasingPrincipal, loanScenario, amortization, stripePresets, savingsGrowth } from './index.ts';
+import { stripeFees, grossForNet, monthlyPayment, purchasingPrincipal, loanScenario, amortization, stripePresets, savingsGrowth, salaryIsr, employmentSubsidy2026, isrMonthly2026, resicoTax, roundMoney } from './index.ts';
 test('Mexico processing fee with 16% fee tax', () => {
   assert.deepEqual(stripeFees(1000, { percent: 3.6, fixed: 3, radar: 0, international: 0, conversion: 0, tax: 16, extra: 0 }),
     { gross: 1000, processing: 39, radar: 0, extra: 0, tax: 6.24, fee: 45.24, net: 954.76 });
@@ -140,4 +140,40 @@ test('savings validation rejects invalid states', () => {
   assert.throws(() => savingsGrowth({ ...base, monthly: -1 }));
   assert.throws(() => savingsGrowth({ ...base, compounding: 4 as 12 }));
   assert.throws(() => savingsGrowth({ initial: 1000, monthly: 0, annualRate: 100, years: 60, compounding: 12 }), /1 trillion/);
+});
+test('ISR on salaries uses the 2026 monthly tariff', () => {
+  const subsidy = employmentSubsidy2026;
+  // 1,339.14 + (15,000 − 14,644.65) × 17.92% = 1,402.82, the published worked example.
+  assert.equal(salaryIsr(15000, subsidy).withheld, 1402.82);
+  // At the cap the subsidy applies: 420.95 + (11,492.66 − 7,168.52) × 10.88% − 535.65.
+  const atCap = salaryIsr(11492.66, subsidy);
+  assert.equal(atCap.tax, 891.42);
+  assert.equal(atCap.withheld, 355.77);
+  assert.equal(salaryIsr(11492.67, subsidy).subsidy, 0);
+  // The subsidy cannot exceed the tax, so low salaries owe zero, never a negative amount.
+  assert.equal(salaryIsr(5000, subsidy).withheld, 0);
+  assert.equal(salaryIsr(0, subsidy).withheld, 0);
+  assert.equal(salaryIsr(500000, subsidy).withheld, roundMoney(133488.54 + (500000 - 425642) * 0.35));
+  assert.throws(() => salaryIsr(-1, subsidy));
+});
+test('every tariff row starts where the previous one ends', () => {
+  for (let i = 1; i < isrMonthly2026.length; i++) {
+    const [lower, fixed] = isrMonthly2026[i], [previousLower, previousFixed, previousRate] = isrMonthly2026[i - 1];
+    // The fixed fee equals the tax at the previous row's upper limit, within a cent of published rounding.
+    assert.ok(Math.abs(previousFixed + (lower - 0.01 - previousLower) * previousRate / 100 - fixed) < 0.02, `row ${i + 1}`);
+  }
+});
+test('RESICO applies the band rate to the whole month', () => {
+  assert.deepEqual(resicoTax(25000, 0, 1.25), { rate: 1, tax: 250, withheld: 0, payment: 250, credit: 0, headroom: 0 });
+  assert.equal(resicoTax(25000.01, 0, 1.25).tax, 275);
+  assert.equal(resicoTax(83333.34, 0, 1.25).rate, 2);
+  assert.equal(resicoTax(300000, 0, 1.25).rate, 2.5);
+  assert.equal(resicoTax(300000, 0, 1.25).headroom, null);
+  // Companies withhold 1.25%; in the 1% band that exceeds the tax and leaves a credit.
+  assert.deepEqual(resicoTax(20000, 20000, 1.25), { rate: 1, tax: 200, withheld: 250, payment: 0, credit: 50, headroom: 5000 });
+  assert.equal(resicoTax(40000, 10000, 1.25).payment, 315);
+  assert.throws(() => resicoTax(1000, 2000, 1.25));
+  // Sub-cent input is rounded before the band is chosen, so 83,333.334 stays at 1.5%.
+  assert.equal(resicoTax(83333.334, 0, 1.25).rate, 1.5);
+  assert.equal(salaryIsr(844.594, employmentSubsidy2026).rate, 1.92);
 });

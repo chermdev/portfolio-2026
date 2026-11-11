@@ -28,6 +28,8 @@ const cards = {
   auto: [['Your next car.', 'Your numbers.'], 'Monthly payments and purchasing power.'],
   mortgage: [['Put a home', 'in perspective.'], 'A clear, flexible mortgage calculator.'],
   savings: [['Watch your', 'savings grow.'], 'A compound interest calculator for regular savers.'],
+  isr: [['Your salary,', 'after ISR.'], 'Monthly ISR withholding with the 2026 tariff.'],
+  resico: [['RESICO,', 'made simple.'], 'Your monthly provisional ISR payment.'],
   image: [['Lighter images.', 'Same look.'], 'Compress, convert, crop, and resize. No uploads.'],
   video: [['Smaller videos.', 'No uploads.'], 'Trim, crop, rotate, and compress in your browser.'],
   notes: [['Notes from', 'the workbench.'], 'Thoughts on building things for the web.'],
@@ -41,10 +43,12 @@ Object.assign(cards, {
   'auto-es': [['Tu próximo', 'auto.'], 'Mensualidades y capacidad de compra.'],
   'mortgage-es': [['Tu próxima', 'casa.'], 'Un simulador hipotecario claro y flexible.'],
   'savings-es': [['Haz crecer', 'tus ahorros.'], 'Un simulador de interés compuesto para ahorrar.'],
-  'notes-es': [['Notas del', 'taller.'], 'Ideas sobre crear cosas para la web.'],
-  'learn-es': [['Espacio para', 'la curiosidad.'], 'Descubre las ideas detrás de las herramientas.'],
+  'isr-es': [['Tu sueldo,', 'sin dudas.'], 'Retención mensual de ISR con la tarifa 2026.'],
+  'resico-es': [['RESICO,', 'sin enredos.'], 'Tu pago provisional mensual de ISR.'],
   'image-es': [['Imágenes ligeras.', 'Igual de bien.'], 'Comprime, convierte, recorta y redimensiona. Sin subir nada.'],
   'video-es': [['Videos ligeros.', 'Sin subir nada.'], 'Recorta, rota y comprime en tu navegador.'],
+  'notes-es': [['Notas del', 'taller.'], 'Ideas sobre crear cosas para la web.'],
+  'learn-es': [['Espacio para', 'la curiosidad.'], 'Descubre las ideas detrás de las herramientas.'],
 });
 const out = new URL('../public/og/', import.meta.url);
 await mkdir(out, { recursive: true });
