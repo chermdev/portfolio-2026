@@ -82,7 +82,7 @@ function VideoCompressorContent() {
       if (output) URL.revokeObjectURL(output.url);
       setOutput({ key, blob, engine, format: job.format, url: URL.createObjectURL(blob), ...target });
     } catch (err) {
-      if (!controller.signal.aborted) setError((err as Error).message || t("This video couldn’t be compressed."));
+      if (!controller.signal.aborted) { console.error(err); setError(t("This video couldn’t be compressed.")); } // ponytail: engine errors are English-only; the raw one goes to the console
     } finally { if (abort.current === controller) { abort.current = null; setStage(null); } }
   }
 
