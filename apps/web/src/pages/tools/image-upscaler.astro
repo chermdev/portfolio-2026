@@ -1,0 +1,18 @@
+---
+import { localeFromPath } from '@portfolio/i18n';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import ImageUpscaler from '../../components/media/ImageUpscaler';
+---
+<ToolLayout title="Image upscaler" description="Sharpen and enlarge AI-generated or low-resolution images with AI that runs on your own GPU. Images never leave your device." category="Media" image="upscale" kind="MultimediaApplication" app>
+  <ImageUpscaler locale={localeFromPath(Astro.url.pathname)} client:load />
+  <div slot="guide" class="flex flex-col gap-8">
+    <div class="prose-copy"><h2>Sharper images, without uploading them.</h2><p>Add an image and choose how to enhance it. An AI model (Real-ESRGAN) runs in your browser on your device’s GPU, or on the processor when the browser can’t use the GPU. The model downloads once and is then reused. Nothing is sent to a server.</p></div>
+    <div class="faq">
+      <details><summary>Fast or best quality?</summary><div class="prose-copy"><p>Fast uses a small model (5 MB) and works well for most images. Best quality uses a larger model (67 MB) that recovers more detail in skin, hair, and textures, but takes several times longer. Try Fast first.</p></div></details>
+      <details><summary>What do same size, ×2, and ×4 mean?</summary><div class="prose-copy"><p>The model always enlarges four times. ×2 and same size scale that result back down, which keeps the recovered sharpness at a smaller size. Same size is useful when you only want a cleaner image, not a bigger one. Processing takes the same time for all three.</p></div></details>
+      <details><summary>How long does it take?</summary><div class="prose-copy"><p>It depends on the image and the device. On a laptop with a recent GPU, a 1024 px image takes about 10 seconds in Fast mode and about a minute in best quality. Without GPU access (for example, in Firefox), the processor does the work and it can take several minutes.</p></div></details>
+      <details><summary>Is it the same as paid AI upscalers?</summary><div class="prose-copy"><p>Not quite. Some paid tools generate new detail with large diffusion models running on servers. This tool restores and sharpens what is already there, so the result stays faithful to your image.</p></div></details>
+      <details><summary>What are the limits?</summary><div class="prose-copy"><p>Images can be up to 2048 px on the longest side, because the model works at four times that size. The result is saved as PNG, so it can be large; use the image compressor afterwards to shrink it. Phones may run out of memory with large images or best quality. The last image, its result, and your options stay in this browser until you choose Start over.</p></div></details>
+    </div>
+  </div>
+</ToolLayout>

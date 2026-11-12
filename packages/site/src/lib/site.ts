@@ -12,6 +12,7 @@ export const tools = [
   { category: 'Taxes', slug: 'isr-calculator', name: 'ISR salary calculator', description: 'See the ISR withheld from your monthly salary in Mexico, with the 2026 tariff.', tag: 'Salaries', icon: 'isr' },
   { category: 'Taxes', slug: 'resico-calculator', name: 'RESICO calculator', description: 'Work out your monthly RESICO payment, including company withholdings.', tag: 'Self-employed', icon: 'resico' },
   { category: 'Media', slug: 'image-compressor', name: 'Image compressor', description: 'Shrink, convert, crop, and resize images. Files never leave your device.', tag: 'Images', icon: 'image' },
+  { category: 'Media', slug: 'image-upscaler', name: 'Image upscaler', description: 'Sharpen and enlarge AI-generated images with AI on your own GPU. No uploads.', tag: 'Images', icon: 'upscale' },
   { category: 'Media', slug: 'video-compressor', name: 'Video compressor', description: 'Trim, crop, rotate, and compress video in your browser. No uploads.', tag: 'Video', icon: 'video' },
 ] as const;
 // ponytail: planned tools are listed so visitors see where the toolbox is going; remove an entry once it ships in `tools`.

@@ -14,6 +14,7 @@ export const isrDefaults = () => ({ salary: '20000', subsidy: String(employmentS
 export const resicoDefaults = () => ({ income: '40000', companies: '0', retention: '1.25' });
 export const imageDefaults = () => ({ imageFormat: 'image/webp', imageQuality: '80', imageMaxSide: '0' });
 export const videoDefaults = () => ({ videoFormat: 'mp4', videoQuality: 'medium', videoMaxSide: '0', mute: false });
+export const upscaleDefaults = () => ({ upscaleModel: 'fast' as 'fast' | 'quality', upscaleScale: '2' as '1' | '2' | '4' });
 type Update<T> = T | ((previous: T) => T);
 // Persist inputs only. Derived results are recomputed; each tool has its own key.
 function calculatorStore<T extends object>(name: string, defaults: () => T) {
@@ -42,7 +43,7 @@ function calculatorStore<T extends object>(name: string, defaults: () => T) {
         }
       }
       const selections = saved as Record<string, unknown>;
-      const choices: Record<string, string[]> = { currency: ['MXN', 'USD'], plan: ['lite', 'standard', 'plus', 'pro'], mode: name.includes('stripe') ? ['charge', 'receive'] : ['payment', 'power'], downType: ['percent', 'cash'], strategy: ['term', 'payment'], compounding: ['1', '12', '365'], imageFormat: ['image/webp', 'image/jpeg', 'image/png', 'image/avif'], imageMaxSide: ['0', '3840', '2560', '1920', '1280', '800'], videoFormat: ['mp4', 'webm'], videoQuality: ['low', 'medium', 'high'], videoMaxSide: ['0', '1920', '1280', '854'] };
+      const choices: Record<string, string[]> = { currency: ['MXN', 'USD'], plan: ['lite', 'standard', 'plus', 'pro'], mode: name.includes('stripe') ? ['charge', 'receive'] : ['payment', 'power'], downType: ['percent', 'cash'], strategy: ['term', 'payment'], compounding: ['1', '12', '365'], imageFormat: ['image/webp', 'image/jpeg', 'image/png', 'image/avif'], imageMaxSide: ['0', '3840', '2560', '1920', '1280', '800'], videoFormat: ['mp4', 'webm'], videoQuality: ['low', 'medium', 'high'], videoMaxSide: ['0', '1920', '1280', '854'], upscaleModel: ['fast', 'quality'], upscaleScale: ['1', '2', '4'] };
       for (const [key, allowed] of Object.entries(choices)) if (key in base && !allowed.includes(String(selections[key]))) return current;
       const deposits = (saved as { deposits?: unknown[] }).deposits;
       if (deposits?.some(item => !item || typeof item !== 'object' || typeof (item as {id?:unknown}).id !== 'number' || typeof (item as {month?:unknown}).month !== 'string' || typeof (item as {amount?:unknown}).amount !== 'string')) return current;
@@ -58,6 +59,7 @@ export const useIsrStore = calculatorStore('chermdev:calculator:isr:v1', isrDefa
 export const useResicoStore = calculatorStore('chermdev:calculator:resico:v1', resicoDefaults);
 export const useImageStore = calculatorStore('chermdev:tool:image:v1', imageDefaults);
 export const useVideoStore = calculatorStore('chermdev:tool:video:v1', videoDefaults);
+export const useUpscaleStore = calculatorStore('chermdev:tool:upscale:v1', upscaleDefaults);
 export function useHydrateCalculator(store: { persist: { rehydrate: () => unknown } }) {
   useEffect(() => { void store.persist.rehydrate(); }, [store]);
 }

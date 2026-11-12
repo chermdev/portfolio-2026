@@ -13,3 +13,5 @@ overrides:
 onlyBuiltDependencies:
   - esbuild
   - sharp
+  # Via onnxruntime-web; its postinstall only prints version-scheme warnings.
+  - protobufjs

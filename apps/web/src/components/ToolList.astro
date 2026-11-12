@@ -35,6 +35,7 @@ function example(icon: string): { parts: SharePart[]; steps?: number[][] } | { c
   }
   // Media tools have no default result to compute; they show what they can write instead.
   if (icon === 'image') return { caption: t('Converts to', {}), value: 'WebP · JPEG · PNG · AVIF' };
+  if (icon === 'upscale') return { caption: t('Final size', {}), value: t('Same · ×2 · ×4', {}) };
   if (icon === 'video') return { caption: t('Converts to', {}), value: 'MP4 · WebM' };
   const { initial, monthly, rate, years, compounding } = savingsDefaults();
   const rows = savingsGrowth({ initial: Number(initial), monthly: Number(monthly), annualRate: Number(rate), years: Number(years), compounding: Number(compounding) as Compounding });

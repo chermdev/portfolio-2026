@@ -23,6 +23,7 @@
     "astro": "7.3.5",
     "lucide-react": "1.48.0",
     "mediabunny": "1.65.2",
+    "onnxruntime-web": "1.31.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "recharts": "3.10.1",
