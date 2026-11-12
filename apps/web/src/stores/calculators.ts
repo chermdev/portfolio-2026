@@ -1,13 +1,19 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { useEffect } from 'react';
-import { stripePresets, employmentSubsidy2026, socialSecurity2026, type Currency, type RadarPlan, type FeeConfig } from '@portfolio/calculators';
+import { stripePresets, mxPaymentPresets, employmentSubsidy2026, socialSecurity2026, type Currency, type RadarPlan, type FeeConfig, type MxPaymentPlan } from '@portfolio/calculators';
 export type Draft = Record<keyof FeeConfig, string>;
 export function feeDefaults(currency: Currency, plan: RadarPlan): Draft {
   const p = stripePresets[currency];
   return { percent: String(p.percent), fixed: String(p.fixed), radar: String(p.radar[plan]), international: String(p.international), conversion: String(p.conversion), tax: String(p.tax), extra: '0' };
 }
 export const stripeDefaults = () => ({ currency: 'MXN' as Currency, plan: 'lite' as RadarPlan, draft: feeDefaults('MXN', 'lite'), international: false, conversion: false, mode: 'charge', amount: '1000' });
+export type PaymentDraft = { percent: string; fixed: string; msi: string; tax: string };
+export function paymentDraft(provider: MxPaymentPlan): PaymentDraft {
+  const p = mxPaymentPresets[provider];
+  return { percent: String(p.percent), fixed: String(p.fixed), msi: '0', tax: '16' };
+}
+export const paymentDefaults = (provider: MxPaymentPlan) => ({ provider, term: '0', draft: paymentDraft(provider), mode: 'charge', amount: '1000' });
 export const loanDefaults = (home: boolean) => ({ mode: 'payment' as 'payment' | 'power', price: home ? '2500000' : '450000', budget: home ? '20000' : '8000', currency: 'MXN', down: '20', downType: 'percent' as 'percent' | 'cash', tradeIn: '0', rate: home ? '10.5' : '12', months: home ? '240' : '60', showSchedule: false, deposits: [] as { id: number; month: string; amount: string }[], strategy: 'term' as 'term' | 'payment' });
 export const savingsDefaults = () => ({ currency: 'MXN', initial: '10000', monthly: '2000', rate: '10', years: '10', compounding: '12' as '1' | '12' | '365', showTable: false });
 export const isrDefaults = () => ({ salary: '20000', subsidy: String(employmentSubsidy2026.amount), cap: String(employmentSubsidy2026.cap), uma: String(socialSecurity2026.uma), minimumWage: String(socialSecurity2026.minimumWage), integration: String(socialSecurity2026.integration), riskPremium: String(socialSecurity2026.riskPremium) });
@@ -45,8 +51,8 @@ function calculatorStore<T extends object>(name: string, defaults: () => T) {
         }
       }
       const selections = saved as Record<string, unknown>;
-      const choices: Record<string, string[]> = { currency: ['MXN', 'USD'], plan: ['lite', 'standard', 'plus', 'pro'], mode: name.includes('stripe') ? ['charge', 'receive'] : ['payment', 'power'], downType: ['percent', 'cash'], strategy: ['term', 'payment'], compounding: ['1', '12', '365'], imageFormat: ['image/webp', 'image/jpeg', 'image/png', 'image/avif'], imageMaxSide: ['0', '3840', '2560', '1920', '1280', '800'], videoFormat: ['mp4', 'webm'], videoQuality: ['low', 'medium', 'high'], videoMaxSide: ['0', '1920', '1280', '854'], upscaleModel: ['fast', 'quality'], upscaleScale: ['1', '2', '4'] };
-      for (const [key, allowed] of Object.entries(choices)) if (key in base && !allowed.includes(String(selections[key]))) return current;
+      const choices: Record<string, string[]> = { currency: ['MXN', 'USD'], plan: ['lite', 'standard', 'plus', 'pro'], mode: ['charge', 'receive'].includes(String((base as Record<string, unknown>).mode)) ? ['charge', 'receive'] : ['payment', 'power'], provider: Object.keys(mxPaymentPresets), term: ['0', '3', '6', '9', '12', '18', '24'], downType: ['percent', 'cash'], strategy: ['term', 'payment'], compounding: ['1', '12', '365'], imageFormat: ['image/webp', 'image/jpeg', 'image/png', 'image/avif'], imageMaxSide: ['0', '3840', '2560', '1920', '1280', '800'], videoFormat: ['mp4', 'webm'], videoQuality: ['low', 'medium', 'high'], videoMaxSide: ['0', '1920', '1280', '854'], upscaleModel: ['fast', 'quality'], upscaleScale: ['1', '2', '4'] };
+      for (const [key, allowed] of Object.entries(choices)) if (key in base && key in selections && !allowed.includes(String(selections[key]))) return current;
       const deposits = (saved as { deposits?: unknown[] }).deposits;
       if (deposits?.some(item => !item || typeof item !== 'object' || typeof (item as {id?:unknown}).id !== 'number' || typeof (item as {month?:unknown}).month !== 'string' || typeof (item as {amount?:unknown}).amount !== 'string')) return current;
       return { ...current, values: Object.fromEntries(Object.keys(base).map(key => [key, key in saved ? (saved as Record<string, unknown>)[key] : base[key as keyof T]])) as T };
@@ -54,6 +60,8 @@ function calculatorStore<T extends object>(name: string, defaults: () => T) {
   }));
 }
 export const useStripeStore = calculatorStore('chermdev:calculator:stripe:v1', stripeDefaults);
+export const useMercadoPagoStore = calculatorStore('chermdev:calculator:mercadopago:v1', () => paymentDefaults('mp-point'));
+export const useClipStore = calculatorStore('chermdev:calculator:clip:v1', () => paymentDefaults('clip'));
 export const useAutoStore = calculatorStore('chermdev:calculator:auto:v1', () => loanDefaults(false));
 export const useMortgageStore = calculatorStore('chermdev:calculator:mortgage:v1', () => loanDefaults(true));
 export const useSavingsStore = calculatorStore('chermdev:calculator:savings:v1', savingsDefaults);

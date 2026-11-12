@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stripeFees, grossForNet, monthlyPayment, purchasingPrincipal, loanScenario, amortization, stripePresets, savingsGrowth, salaryIsr, employmentSubsidy2026, isrMonthly2026, resicoTax, roundMoney, payrollContributions, socialSecurity2026 } from './index.ts';
+import { stripeFees, grossForNet, monthlyPayment, purchasingPrincipal, loanScenario, amortization, stripePresets, savingsGrowth, salaryIsr, employmentSubsidy2026, isrMonthly2026, resicoTax, roundMoney, payrollContributions, socialSecurity2026, mxPaymentPresets as p, mercadoPagoMsi, mxFeeConfig } from './index.ts';
 test('Mexico processing fee with 16% fee tax', () => {
   assert.deepEqual(stripeFees(1000, { percent: 3.6, fixed: 3, radar: 0, international: 0, conversion: 0, tax: 16, extra: 0 }),
     { gross: 1000, processing: 39, radar: 0, extra: 0, tax: 6.24, fee: 45.24, net: 954.76 });
@@ -201,4 +201,16 @@ test('payroll contributions follow the 2026 IMSS, SAR and INFONAVIT rates', () =
   assert.equal(high.employee, roundMoney(excess * 0.004 + 2932.75 * 30.4 * 0.02375));
   assert.deepEqual(payrollContributions(200000, socialSecurity2026), payrollContributions(400000, socialSecurity2026));
   assert.equal(payrollContributions(0, socialSecurity2026).employer.total, 0);
+});
+test('Mercado Pago and Clip presets match the providers\' published examples', () => {
+  const fees = (plan: keyof typeof p, msi = 0) => stripeFees(1000, mxFeeConfig(p[plan].percent, p[plan].fixed, msi, 16));
+  // Mercado Pago's own example: $1,000 at 3.5% + IVA leaves $959.40.
+  assert.equal(fees('mp-point').net, 959.4);
+  assert.equal(fees('mp-link-now').net, 954.88); // (34.90 + 4) × 1.16 = 45.12
+  assert.equal(fees('clip').net, 964.16); // (29.90 + 1) × 1.16 = 35.84
+  assert.equal(fees('mp-point', mercadoPagoMsi[3]).net, 905); // (3.5% + 4.69%) × 1.16
+  for (const plan of Object.keys(p) as (keyof typeof p)[]) {
+    const config = mxFeeConfig(p[plan].percent, p[plan].fixed, mercadoPagoMsi[24], 16);
+    assert.ok(stripeFees(grossForNet(1000, config), config).net >= 1000);
+  }
 });

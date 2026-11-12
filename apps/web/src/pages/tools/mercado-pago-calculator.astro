@@ -1,0 +1,16 @@
+---
+import { localeFromPath } from '@portfolio/i18n';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import PaymentsCalculator from '../../components/calculators/PaymentsCalculator';
+---
+<ToolLayout title="Mercado Pago fee calculator" seoTitle="Mercado Pago fee calculator for Mexico, Point and payment link" description="See what you keep from each Mercado Pago sale, or what to charge. Point terminal and payment links, with IVA and months without interest." category="Payments" image="mercadopago" checked="Rates checked November 12, 2026" app>
+  <PaymentsCalculator brand="mercadopago" locale={localeFromPath(Astro.url.pathname)} client:load />
+  <div slot="guide" class="flex flex-col gap-8">
+    <div class="prose-copy"><h2>Know what each sale leaves you.</h2><p>Pick a plan, enter a sale, and see the processing fee, the IVA on that fee, and what reaches your account. To work backwards, select “I want to receive” and enter the amount you need to keep. Below the result, the same sale is priced on the other plans and on Clip.</p></div>
+    <div class="faq">
+      <details><summary>How are fees calculated?</summary><div class="prose-copy"><p>Processing fee = sale × (base rate + MSI surcharge) + fixed fee. IVA (16% by default) is then charged on that fee. Each part is rounded to cents.</p><p>The reverse calculator finds a charge in whole cents that leaves at least your desired amount after these rounded fees. Tiny differences from your statement are possible.</p></div></details>
+      <details><summary>Which plan should I pick?</summary><div class="prose-copy"><p>Point charges 3.5% + IVA per card sale with no fixed fee. Payment links charge 3.49%, 3.19%, or 2.95% + $4 + IVA, depending on whether you get the money instantly, in 7 days, or in 30 days.</p><p>Months without interest (MSI) add a surcharge to the base rate that your business pays, from 4.69% at 3 months to 27.29% at 24 months.</p></div></details>
+      <details><summary>Where do the presets come from?</summary><div class="prose-copy"><p>Checked November 12, 2026 against <a href="https://www.mercadopago.com.mx/herramientas-para-vender/lectores-point">Mercado Pago Point</a> and <a href="https://www.mercadopago.com.mx/herramientas-para-vender/link-de-pago">Mercado Pago payment links</a>. Terminal prices, cash payments at stores, chargebacks, and negotiated rates are not included.</p><p>Confirm the rate on your own account. This independent tool is not affiliated with Mercado Pago.</p></div></details>
+    </div>
+  </div>
+</ToolLayout>

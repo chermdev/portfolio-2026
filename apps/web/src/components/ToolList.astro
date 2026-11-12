@@ -4,8 +4,8 @@ import AppIcon from './AppIcon.astro';
 import { BlurToSharp } from './media/BlurToSharp';
 import { tools, upcomingTools } from '@portfolio/site/lib/site';
 import { localeFromPath, translate } from '@portfolio/i18n';
-import { stripeFees, loanScenario, savingsGrowth, salaryIsr, resicoTax, type Compounding, type FeeConfig } from '@portfolio/calculators';
-import { stripeDefaults, loanDefaults, savingsDefaults, isrDefaults, resicoDefaults } from '../stores/calculators';
+import { stripeFees, mxPaymentPresets, mxFeeConfig, loanScenario, savingsGrowth, salaryIsr, resicoTax, type Compounding, type FeeConfig } from '@portfolio/calculators';
+import { stripeDefaults, paymentDefaults, loanDefaults, savingsDefaults, isrDefaults, resicoDefaults } from '../stores/calculators';
 import { ShareBars, BlockShape, TornPaper, CashRegister, type SharePart } from '@portfolio/ui/components/share-chart';
 const locale = localeFromPath(Astro.url.pathname);
 const t = (text: string, values: Record<string, string | number>) => translate(text, locale, values);
@@ -19,6 +19,11 @@ function example(icon: string): Money | { caption: string; value: string } | { b
     const config = { ...Object.fromEntries(Object.entries(draft).map(([key, value]) => [key, Number(value)])), international: 0, conversion: 0 } as FeeConfig;
     const { net, fee } = stripeFees(Number(amount), config);
     return { kind: 'register', parts: [{ label: t('What you receive', {}), value: net, color: keep }, { label: t('Stripe fees', {}), value: fee, color: cost }] };
+  }
+  if (icon === 'mercadopago' || icon === 'clip') {
+    const { provider, amount } = paymentDefaults(icon === 'clip' ? 'clip' : 'mp-point');
+    const { net, fee } = stripeFees(Number(amount), mxFeeConfig(mxPaymentPresets[provider].percent, mxPaymentPresets[provider].fixed, 0, 16));
+    return { kind: 'register', parts: [{ label: t('What you receive', {}), value: net, color: keep }, { label: t('Card fees', {}), value: fee, color: cost }] };
   }
   if (icon === 'car' || icon === 'home') {
     const { price, down, rate, months } = loanDefaults(icon === 'home');

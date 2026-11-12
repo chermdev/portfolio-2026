@@ -6,6 +6,8 @@ export const site = {
 export const destinations = { blog: import.meta.env.PUBLIC_BLOG_URL || '/notes', learn: import.meta.env.PUBLIC_LEARN_URL || '/learn' };
 export const tools = [
   { category: 'Finance', slug: 'stripe-calculator', name: 'Stripe fee calculator', description: 'Know what you keep. Work forwards or backwards, in MXN or USD.', tag: 'Payments', icon: 'stripe' },
+  { category: 'Finance', slug: 'mercado-pago-calculator', name: 'Mercado Pago fee calculator', description: 'Know what you keep with Point or a payment link, with IVA and months without interest.', tag: 'Payments', icon: 'mercadopago' },
+  { category: 'Finance', slug: 'clip-calculator', name: 'Clip fee calculator', description: 'Know what you keep from each Clip sale, or what to charge, with IVA.', tag: 'Payments', icon: 'clip' },
   { category: 'Finance', slug: 'auto-loan-calculator', name: 'Auto loan calculator', description: 'Find your monthly payment, or the car that fits your budget.', tag: 'Auto finance', icon: 'car' },
   { category: 'Finance', slug: 'mortgage-calculator', name: 'Mortgage calculator', description: 'Explore your monthly payment and how much home you can afford.', tag: 'Home finance', icon: 'home' },
   { category: 'Finance', slug: 'compound-interest-calculator', name: 'Compound interest calculator', description: 'See how your savings could grow with regular contributions.', tag: 'Savings', icon: 'savings' },

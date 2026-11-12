@@ -1,0 +1,16 @@
+---
+import { localeFromPath } from '@portfolio/i18n';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import PaymentsCalculator from '../../components/calculators/PaymentsCalculator';
+---
+<ToolLayout title="Clip fee calculator" seoTitle="Clip fee calculator for Mexico, terminal and payment link" description="See what you keep from each Clip sale, or what to charge. Terminal and payment links, with IVA." category="Payments" image="clip" checked="Rates checked November 12, 2026" app>
+  <PaymentsCalculator brand="clip" locale={localeFromPath(Astro.url.pathname)} client:load />
+  <div slot="guide" class="flex flex-col gap-8">
+    <div class="prose-copy"><h2>Know what each sale leaves you.</h2><p>Enter a sale and see Clip's fee, the IVA on that fee, and what reaches your account. To work backwards, select “I want to receive” and enter the amount you need to keep. Below the result, the same sale is priced on Mercado Pago.</p></div>
+    <div class="faq">
+      <details><summary>How are fees calculated?</summary><div class="prose-copy"><p>Processing fee = sale × (base rate + MSI surcharge) + fixed fee. IVA (16% by default) is then charged on that fee. Each part is rounded to cents.</p><p>The reverse calculator finds a charge in whole cents that leaves at least your desired amount after these rounded fees. Tiny differences from your statement are possible.</p></div></details>
+      <details><summary>What about promotions and months without interest?</summary><div class="prose-copy"><p>Clip charges 2.99% + $1 + IVA on its terminals and payment links. It is running temporary promotional rates of 2.59% and 1.99% + $1 through December 31, 2026, under conditions; if you have one, edit the rate under Rates.</p><p>Clip does not publish its MSI rates, so enter yours under Rates if you offer them.</p></div></details>
+      <details><summary>Where do the presets come from?</summary><div class="prose-copy"><p>Checked November 12, 2026 against <a href="https://www.clip.mx/soluciones/pagos-con-link">Clip payment links</a> and the <a href="https://shop.clip.mx/products/clip-total">Clip Total 3 page</a>. Terminal prices, chargebacks, and negotiated rates are not included.</p><p>Confirm the rate on your own account. This independent tool is not affiliated with Clip.</p></div></details>
+    </div>
+  </div>
+</ToolLayout>

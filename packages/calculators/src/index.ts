@@ -10,7 +10,26 @@ export const stripePresets = {
   USD: { label: 'United States · USD', percent: 2.9, fixed: 0.3, international: 1.5, conversion: 1, tax: 0,
     radar: { lite: 0, standard: 0.05, plus: 0.07, pro: 0.09 }, abuse: 0.005 },
 } as const;
-export const roundMoney = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
+/**
+ * Mexico card-acceptance plans, MXN, fees before IVA. Checked 12 Nov 2026 on mercadopago.com.mx
+ * (lectores-point, link-de-pago) and clip.mx (pagos-con-link, Clip Total 3 FAQ). Clip's 2.59% / 1.99% rates are
+ * temporary promotions (2 Nov–31 Dec 2026), so the standard rate is the default.
+ * `msi` marks plans with a published months-without-interest surcharge table (`mercadoPagoMsi`).
+ * ponytail: fees run through `stripeFees` (percent + fixed, then tax on the fee); the extra Stripe fields stay 0.
+ */
+export const mxPaymentPresets = {
+  'mp-point': { brand: 'mercadopago', label: 'Mercado Pago · Point terminal', percent: 3.5, fixed: 0, msi: true },
+  'mp-link-now': { brand: 'mercadopago', label: 'Mercado Pago · Link, money now', percent: 3.49, fixed: 4, msi: true },
+  'mp-link-7': { brand: 'mercadopago', label: 'Mercado Pago · Link, money in 7 days', percent: 3.19, fixed: 4, msi: true },
+  'mp-link-30': { brand: 'mercadopago', label: 'Mercado Pago · Link, money in 30 days', percent: 2.95, fixed: 4, msi: true },
+  clip: { brand: 'clip', label: 'Clip · terminal or link', percent: 2.99, fixed: 1, msi: false },
+} as const;
+export type MxPaymentPlan = keyof typeof mxPaymentPresets;
+/** Mercado Pago months-without-interest surcharge by term, % added to the base rate before IVA. */
+export const mercadoPagoMsi = { 0: 0, 3: 4.69, 6: 7.69, 9: 11.19, 12: 12.89, 18: 19.39, 24: 27.29 } as const;
+export const mxFeeConfig = (percent: number, fixed: number, msi: number, tax: number): FeeConfig =>
+  ({ percent: percent + msi, fixed, tax, radar: 0, international: 0, conversion: 0, extra: 0 });
+export const roundMoney =(value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
 function finiteRange(value: number, min: number, max: number, name: string) {
   if (!Number.isFinite(value) || value < min || value > max) throw new Error(`${name} must be between ${min} and ${max}.`);
 }
