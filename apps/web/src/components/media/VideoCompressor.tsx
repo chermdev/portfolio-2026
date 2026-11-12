@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { LocaleProvider, useTranslation } from '@portfolio/i18n/react';
 import { type Locale } from '@portfolio/i18n';
-import { Download, Film, Pause, Play, RotateCcw, ShieldCheck, X } from 'lucide-react';
+import { Download, Pause, Play, RotateCcw, ShieldCheck, X } from 'lucide-react';
 import { Button } from '@portfolio/ui/components/button';
 import { Field, FieldLabel, FieldDescription } from '@portfolio/ui/components/field';
 import { Slider } from '@portfolio/ui/components/slider';
@@ -88,12 +88,13 @@ function VideoCompressorContent() {
 
   const change = output ? sizeChange(source!.file.size, output.blob.size, tag) : null;
   const working = stage !== null;
-  const qualityLabels = { low: t("Smallest"), medium: t("Balanced"), high: t("Best quality") };
+  const qualityLabels = { low: t("Smallest"), medium: t("Balanced"), high: t("Quality") };
   const sizeLabels: Record<string, string> = { '0': t("Original size"), '1920': '1080p · 1920 px', '1280': '720p · 1280 px', '854': '480p · 854 px' };
 
   return <div className="tool-workspace">
     <aside className="tool-pane-inputs" aria-label={t("Inputs")}>
-      <Dropzone accept="video/*,.mkv,.mov" onFiles={load}><span className="font-medium text-foreground">{source ? t("Choose another video") : t("Drop a video or choose a file")}</span><span className="meta">{source ? source.file.name : t("MP4, MOV, WebM and more")}</span></Dropzone>
+      {/* With nothing loaded, the large drop target in the result pane takes over on desktop. */}
+      <Dropzone accept="video/*,.mkv,.mov" onFiles={load} className={source ? undefined : 'lg:hidden'}><span className="font-medium text-foreground">{source ? t("Choose another video") : t("Drop a video or choose a file")}</span><span className="meta">{source ? source.file.name : t("MP4, MOV, WebM and more")}</span></Dropzone>
       <Field><FieldLabel id="video-format">{t("Convert to")}</FieldLabel><ToggleGroup type="single" variant="outline" className="grid w-full grid-cols-2" aria-labelledby="video-format" value={format} onValueChange={value => { if (value) set('videoFormat', value); }}>
         <ToggleGroupItem value="mp4" className="h-11 sm:h-9">MP4 · H.264</ToggleGroupItem><ToggleGroupItem value="webm" className="h-11 sm:h-9">WebM · VP9</ToggleGroupItem>
       </ToggleGroup><FieldDescription>{format === 'mp4' ? t("Plays almost everywhere.") : t("Smaller at the same quality, but not every device plays it.")}</FieldDescription></Field>
@@ -104,12 +105,12 @@ function VideoCompressorContent() {
       <Field orientation="horizontal"><FieldLabel htmlFor="video-mute" className="flex-1">{t("Remove audio")}</FieldLabel><Switch id="video-mute" checked={settings.mute} onCheckedChange={value => set('mute', value)} /></Field>
       <div className="mt-auto flex flex-col items-start gap-3 border-t pt-5"><p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"><ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0" size={16} /> {t("Videos are processed on this device and never uploaded. Settings are saved here.")}</p><Button variant="ghost" size="sm" className="-ml-2.5 h-11 sm:h-8" onClick={reset}><RotateCcw aria-hidden="true" /> {t("Reset settings")}</Button></div>
     </aside>
-    <section className="tool-pane-result" aria-label={t("Compressed video")}>
+    <section className={source ? 'tool-pane-result' : 'tool-pane-result max-lg:hidden'} aria-label={t("Compressed video")}>
       {source && <video ref={video} src={source.url} className="sr-only" aria-hidden="true" tabIndex={-1} playsInline preload="auto"
         onLoadedMetadata={event => { const element = event.currentTarget; setSource(previous => previous && { ...previous, width: element.videoWidth, height: element.videoHeight, duration: element.duration }); setTrim([0, element.duration]); }}
         onLoadedData={() => setTick(value => value + 1)} onSeeked={() => setTick(value => value + 1)} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}
         onError={() => setError(t("This browser can’t preview this video. You can still try to compress it."))} />}
-      {!source ? <div className="flex h-full min-h-64 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed p-8 text-center text-muted-foreground"><Film aria-hidden="true" size={28} strokeWidth={1.5} /><p className="font-medium text-foreground">{t("No video yet")}</p><p className="max-w-sm text-sm">{t("Add a video on the left to trim, crop, rotate and compress it.")}</p></div> : <div className="flex flex-col gap-8">
+      {!source ? <Dropzone accept="video/*,.mkv,.mov" onFiles={load} className="h-full min-h-64"><span className="font-medium text-foreground">{t("Drop a video or choose a file")}</span><span className="meta">{t("MP4, MOV, WebM and more")}</span><span className="mt-2 max-w-sm">{t("Trim, crop, rotate and compress it here.")}</span></Dropzone> : <div className="flex flex-col gap-8">
         <div className="grid gap-8 @3xl:grid-cols-[minmax(0,1fr)_16rem] @3xl:items-start">
           <div className="flex min-w-0 flex-col gap-4">
             {size ? <CropEditor source={video.current} size={size} edits={edits} onCrop={value => setEdits({ ...edits, crop: value })} tick={tick} label={t('Preview of {name}', { name: source.file.name })} /> : <div className="crop-stage min-h-48 w-full" />}

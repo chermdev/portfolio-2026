@@ -11,7 +11,7 @@ import { Alert, AlertTitle, AlertDescription } from '@portfolio/ui/components/al
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@portfolio/ui/components/table';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@portfolio/ui/components/chart';
 import { savingsGrowth, roundMoney, type Compounding } from '@portfolio/calculators';
-import { NumberField, SelectField, AmountField, Settings, Receipt, MobileResult, Insights, money } from './Fields';
+import { NumberField, SelectField, AmountField, Settings, Receipt, MobileResult, Insights, Headline, Assumptions, money } from './Fields';
 function SavingsCalculatorContent() {
   const { t, locale } = useTranslation();
   useHydrateCalculator(useSavingsStore);
@@ -55,15 +55,17 @@ function SavingsCalculatorContent() {
   ] : [];
   return <div className="tool-workspace">
     <aside ref={inputs} className="tool-pane-inputs" aria-label={t("Inputs")}>
-      <SelectField label={t("Currency")} value={currency} onChange={value => set('currency', value)} options={[{ value: 'MXN', label: t("Mexican peso · MXN") }, { value: 'USD', label: t("US dollar · USD") }]} />
       <AmountField label={t("Monthly contribution")} value={monthly} onChange={value => set('monthly', value)} currency={currency} quick={currency === 'USD' ? [100, 250, 500] : [1000, 2000, 5000]} hint={t("Added at the end of each month.")} />
       <FieldGroup>
         <NumberField label={t("Initial deposit")} suffix={currency} value={initial} onChange={value => set('initial', value)} />
         <div className="grid items-end gap-5 sm:grid-cols-2 lg:grid-cols-1"><NumberField label={t("Annual interest rate")} value={rate} onChange={value => set('rate', value)} max={100} suffix="%" /><NumberField label={t("Years")} value={years} onChange={value => set('years', value)} min={1} max={60} step={1} /></div>
-        <p className="text-sm text-muted-foreground"> {t("Illustrative default, not a market rate. Enter the nominal annual rate before taxes and inflation.")} </p>
+        <p className="text-sm text-muted-foreground"> {t("Example rate. Use the nominal annual rate, before taxes and inflation.")} </p>
       </FieldGroup>
-      <Settings title={t("Compounding frequency")} summary={frequency}>
-        <Field><FieldLabel className="sr-only"> {t("Compounding frequency")} </FieldLabel><ToggleGroup type="single" value={compounding} onValueChange={value => { if (value) set('compounding', value as typeof compounding); }} variant="outline" className="w-full" aria-label={t("Compounding frequency")}>{([['365', t("Daily")], ['12', t("Monthly")], ['1', t("Annually")]] as const).map(([value, label]) => <ToggleGroupItem key={value} value={value} className="h-auto min-h-11 flex-1 whitespace-normal py-2 text-center">{label}</ToggleGroupItem>)}</ToggleGroup><FieldDescription> {t("How often your institution adds interest to the balance.")} </FieldDescription></Field>
+      <Settings title={t("More options")} summary={`${currency} · ${t("Compounding")} ${frequency.toLowerCase()}`} edited={currency !== 'MXN' || compounding !== '12'}>
+        <FieldGroup>
+        <SelectField label={t("Currency")} value={currency} onChange={value => set('currency', value)} options={[{ value: 'MXN', label: t("Mexican peso · MXN") }, { value: 'USD', label: t("US dollar · USD") }]} />
+        <Field><FieldLabel id="compounding">{t("Compounding frequency")}</FieldLabel><ToggleGroup type="single" value={compounding} onValueChange={value => { if (value) set('compounding', value as typeof compounding); }} variant="outline" className="w-full" aria-labelledby="compounding">{([['365', t("Daily")], ['12', t("Monthly")], ['1', t("Annually")]] as const).map(([value, label]) => <ToggleGroupItem key={value} value={value} className="h-auto min-h-11 flex-1 whitespace-normal py-2 text-center">{label}</ToggleGroupItem>)}</ToggleGroup><FieldDescription> {t("How often your institution adds interest to the balance.")} </FieldDescription></Field>
+        </FieldGroup>
       </Settings>
       <div className="mt-auto flex flex-col items-start gap-3 border-t pt-5"><p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"><ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0" size={16} /> {t("Inputs saved on this device.")} </p><Button variant="ghost" size="sm" className="-ml-2.5 h-11 sm:h-8" onClick={reset}><RotateCcw aria-hidden="true" /> {t("Reset calculator")} </Button></div>
     </aside>
@@ -72,9 +74,9 @@ function SavingsCalculatorContent() {
         {final ? <>
           <div className="grid gap-8 @3xl:grid-cols-2 @3xl:items-start">
             <div className="flex flex-col gap-6">
-              <div ref={headlineRef} className="scroll-mt-28" aria-live="polite" aria-atomic="true"><h2 className="meta">{headline}</h2><p className="result-value mt-1">{shown}</p><p className="text-xs text-muted-foreground">{currency} · {t("before taxes and inflation")}</p></div>
+              <Headline ref={headlineRef} label={headline} value={shown} note={`${currency} · ${t("before taxes and inflation")}`} />
               <Receipt segments={[{ label: t("Initial deposit"), value: start, color: 'var(--glow-3)' }, { label: t("Monthly contributions"), value: roundMoney(final.deposited - start), color: 'var(--glow-2)' }, { label: t("Interest earned"), value: final.earned, color: 'var(--glow-1)' }]} />
-              <p className="text-xs leading-5 text-muted-foreground"> {t("Estimates assume a constant rate, no withdrawals, fees, or taxes on interest. Changing currency changes the label, not the exchange value.")} </p>
+              <Assumptions><p>{t("Estimates assume a constant rate, no withdrawals, fees, or taxes on interest. Changing currency changes the label, not the exchange value.")}</p></Assumptions>
             </div>
             <div className="result-panel gap-4"><h3 className="meta">{t("Breakdown")}</h3><Receipt
               lines={[{ label: t("Initial deposit"), value: money(start, currency, locale) }, { sign: '+', label: t("Monthly contributions"), value: money(roundMoney(final.deposited - start), currency, locale) }, { sign: '+', label: t("Interest earned"), value: money(final.earned, currency, locale) }, { sign: '=', label: t("Final balance"), value: money(final.balance, currency, locale) }]}

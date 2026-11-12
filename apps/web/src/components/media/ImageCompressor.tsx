@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { LocaleProvider, useTranslation } from '@portfolio/i18n/react';
 import { type Locale } from '@portfolio/i18n';
-import { Download, ImageOff, RotateCcw, ShieldCheck, Trash2, X } from 'lucide-react';
+import { Download, RotateCcw, ShieldCheck, Trash2, X } from 'lucide-react';
 import { Button } from '@portfolio/ui/components/button';
 import { Field, FieldLabel, FieldDescription } from '@portfolio/ui/components/field';
 import { Slider } from '@portfolio/ui/components/slider';
@@ -112,18 +112,19 @@ function ImageCompressorContent() {
 
   return <div className="tool-workspace">
     <aside className="tool-pane-inputs" aria-label={t("Inputs")}>
-      <Dropzone accept="image/*,.heic,.heif" multiple onFiles={add}><span className="font-medium text-foreground">{t("Drop images or choose files")}</span><span className="meta">{t("JPEG, PNG, WebP, AVIF, GIF and more")}</span></Dropzone>
+      {/* With nothing loaded, the large drop target in the result pane takes over on desktop. */}
+      <Dropzone accept="image/*,.heic,.heif" multiple onFiles={add} className={current ? undefined : 'lg:hidden'}><span className="font-medium text-foreground">{t("Drop images or choose files")}</span><span className="meta">{t("JPEG, PNG, WebP, AVIF, GIF and more")}</span></Dropzone>
       <Field><FieldLabel id="image-format">{t("Convert to")}</FieldLabel><ToggleGroup type="single" variant="outline" className="grid w-full grid-cols-4" aria-labelledby="image-format" value={format.type} onValueChange={value => { if (value) set('imageFormat', value); }}>
         {formats.map(item => <ToggleGroupItem key={item.type} value={item.type} disabled={!supported.includes(item.type)} className="h-11 sm:h-9">{item.label}</ToggleGroupItem>)}
-      </ToggleGroup>{supported.length < formats.length && <FieldDescription>{t("Formats this browser can’t write are unavailable.")}</FieldDescription>}</Field>
+      </ToggleGroup>{supported.length < formats.length && <FieldDescription>{t('Not available in this browser: {formats}', { formats: formats.filter(item => !supported.includes(item.type)).map(item => item.label).join(', ') })}</FieldDescription>}</Field>
       <Field data-disabled={format.type === 'image/png' || undefined}><FieldLabel id="image-quality">{t("Quality")}<span className="meta ml-auto tabular-nums">{format.type === 'image/png' ? t("Lossless") : `${settings.imageQuality}%`}</span></FieldLabel>
         <Slider min={10} max={100} step={5} value={[Number(settings.imageQuality)]} onValueChange={([value]) => set('imageQuality', String(value))} disabled={format.type === 'image/png'} thumbLabels={[t("Quality")]} className="py-2" />
-        <FieldDescription>{format.type === 'image/png' ? t("PNG is lossless, so quality doesn’t apply. Resize to make it smaller.") : t("Lower means smaller files. 70–85% usually looks the same.")}</FieldDescription></Field>
+        <FieldDescription>{format.type === 'image/png' ? t("PNG is lossless, so quality doesn’t apply. Resize to make it smaller.") : t("70–85% usually looks the same.")}</FieldDescription></Field>
       <SelectField label={t("Resize: longest side")} value={settings.imageMaxSide} onChange={value => set('imageMaxSide', value)} options={['0', '3840', '2560', '1920', '1280', '800'].map(value => ({ value, label: sizeLabel(value) }))} />
       <div className="mt-auto flex flex-col items-start gap-3 border-t pt-5"><p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"><ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0" size={16} /> {t("Images are processed on this device and never uploaded. Settings are saved here.")}</p><Button variant="ghost" size="sm" className="-ml-2.5 h-11 sm:h-8" onClick={reset}><RotateCcw aria-hidden="true" /> {t("Reset settings")}</Button></div>
     </aside>
-    <section className="tool-pane-result" aria-label={t("Compressed images")}>
-      {!current ? <div className="flex h-full min-h-64 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed p-8 text-center text-muted-foreground"><ImageOff aria-hidden="true" size={28} strokeWidth={1.5} /><p className="font-medium text-foreground">{t("No images yet")}</p><p className="max-w-sm text-sm">{t("Add images on the left. Each one is compressed as soon as it loads, and you can rotate or crop it here.")}</p></div> : <div className="flex flex-col gap-8">
+    <section className={current ? 'tool-pane-result' : 'tool-pane-result max-lg:hidden'} aria-label={t("Compressed images")}>
+      {!current ? <Dropzone accept="image/*,.heic,.heif" multiple onFiles={add} className="h-full min-h-64"><span className="font-medium text-foreground">{t("Drop images or choose files")}</span><span className="meta">{t("JPEG, PNG, WebP, AVIF, GIF and more")}</span><span className="mt-2 max-w-sm">{t("Each one is compressed as soon as it loads, and you can rotate or crop it here.")}</span></Dropzone> : <div className="flex flex-col gap-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div aria-live="polite"><h2 className="meta">{t('{count} of {total} images compressed', { count: done.length, total: items.length })}</h2><p className="result-value mt-1">{total ? total.after : '—'}</p><p className="text-xs text-muted-foreground">{total ? t('From {before} · {change}', { before: total.before, change: total.change }) : t("Compressing…")}</p></div>
           <div className="flex flex-wrap gap-2"><Button disabled={!done.length || pending} onClick={() => done.forEach((item, index) => setTimeout(() => download(item), index * 250))}><Download data-icon="inline-start" /> {done.length > 1 ? t("Download all") : t("Download")}</Button><Button variant="outline" onClick={clear}><Trash2 data-icon="inline-start" /> {t("Clear")}</Button></div>

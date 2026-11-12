@@ -8,7 +8,7 @@ import { FieldGroup } from '@portfolio/ui/components/field';
 import { Alert, AlertTitle, AlertDescription } from '@portfolio/ui/components/alert';
 import { Iceberg } from '@portfolio/ui/components/iceberg';
 import { salaryIsr, payrollContributions, socialSecurity2026, roundMoney } from '@portfolio/calculators';
-import { NumberField, AmountField, Settings, Receipt, MobileResult, Insights, money } from './Fields';
+import { NumberField, AmountField, Settings, Receipt, MobileResult, Insights, Headline, Assumptions, money } from './Fields';
 function IsrCalculatorContent() {
   const { t, locale } = useTranslation();
   useHydrateCalculator(useIsrStore);
@@ -32,7 +32,7 @@ function IsrCalculatorContent() {
   const imssEdited = uma !== defaults.uma || minimumWage !== defaults.minimumWage || integration !== defaults.integration || riskPremium !== defaults.riskPremium;
   return <div className="tool-workspace">
     <aside ref={inputs} className="tool-pane-inputs" aria-label={t("Inputs")}>
-      <AmountField label={t("Monthly taxable salary")} value={salary} onChange={value => set('salary', value)} currency="MXN" quick={[10000, 20000, 40000]} hint={t("Gross monthly pay before deductions. Leave out exempt items such as part of your bonus or savings fund.")} />
+      <AmountField label={t("Monthly taxable salary")} value={salary} onChange={value => set('salary', value)} currency="MXN" quick={[10000, 20000, 40000]} hint={t("Gross, before deductions. Leave out exempt pay, such as part of your bonus.")} />
       <Settings title={t("Employment subsidy")} summary={t('{amount} up to {cap} a month', { amount: mxn(Number(subsidy)), cap: mxn(Number(cap)) })} edited={subsidy !== defaults.subsidy || cap !== defaults.cap}>
         <FieldGroup>
           <NumberField label={t("Subsidy amount")} suffix="MXN" value={subsidy} onChange={value => set('subsidy', value)} max={1e6} hint={t("2026 decree: 15.02% of the monthly UMA, February to December. January used MXN 536.21.")} />
@@ -54,18 +54,18 @@ function IsrCalculatorContent() {
         {result ? <>
           <div className="grid gap-8 @3xl:grid-cols-2 @3xl:items-start">
             <div className="flex flex-col gap-6">
-              <div ref={headlineRef} className="scroll-mt-28" aria-live="polite" aria-atomic="true"><h2 className="meta">{headline}</h2><p className="result-value mt-1">{shown}</p><p className="text-xs text-muted-foreground">MXN · {t("after ISR and IMSS")}</p></div>
+              <Headline ref={headlineRef} label={headline} value={shown} note={`MXN · ${t("after ISR and IMSS")}`} />
               <Receipt segments={[{ label: t("Take-home pay"), value: result.takeHome, color: 'var(--glow-2)' }, { label: t("ISR"), value: result.withheld, color: 'var(--glow-1)' }, { label: t("IMSS"), value: result.social.employee, color: 'color-mix(in oklab, var(--glow-1) 55%, var(--card))' }]} />
-              <p className="text-xs leading-5 text-muted-foreground"> {t("Estimate of a monthly payroll: ISR withholding and your IMSS contributions. Infonavit credit payments and other deductions are not included, and the annual return can adjust ISR.")} </p>
               {result.subsidy > 0 && <p className="text-xs leading-5 text-muted-foreground"> {t("Earning more than {cap} a month removes the whole employment subsidy, so the withholding jumps there.", { cap: mxn(Number(cap)) })} </p>}
               {result.social.paysEmployeeShare && <p className="text-xs leading-5 text-muted-foreground"> {t("At the minimum wage your employer pays your IMSS share too, so none is deducted.")} </p>}
+              <Assumptions><p>{t("Estimate of a monthly payroll: ISR withholding and your IMSS contributions. Infonavit credit payments and other deductions are not included, and the annual return can adjust ISR.")}</p></Assumptions>
             </div>
             <div className="result-panel gap-4"><h3 className="meta">{t("Breakdown")}</h3><Receipt
               lines={[{ label: t("Monthly salary"), value: mxn(result.income) }, { sign: '−', label: t("ISR withheld"), value: mxn(result.withheld) }, { sign: '−', label: t("IMSS (your share)"), value: mxn(result.social.employee) }, { sign: '=', label: t("Take-home pay"), value: mxn(result.takeHome) }]}
               formula={result.rate ? [t("ISR = fixed fee + (income − lower limit) × rate"), `${mxn(result.fixed)} + (${mxn(result.income)} − ${mxn(result.lower)}) × ${result.rate}% = ${mxn(result.tax)}`, ...(result.subsidy > 0 ? [`${mxn(result.tax)} − ${mxn(result.subsidy)} ${t("subsidy")} = ${mxn(result.withheld)}`] : [])] : []} /></div>
           </div>
           <div className="result-panel gap-5">
-            <div><h3 className="meta">{t("What your job really costs")}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{t("Your payslip shows the tip. Below the water are your taxes and the contributions your employer pays on top of your salary: {cost} in total each month.", { cost: mxn(totalCost) })}</p></div>
+            <div><h3 className="meta">{t("What your job really costs")}</h3><p className="mt-1 text-2xl font-medium tabular-nums">{mxn(totalCost)} <span className="text-sm font-normal text-muted-foreground">{t("a month")}</span></p><p className="mt-1 text-sm leading-6 text-muted-foreground">{t("Your payslip shows the tip. Below the water: your taxes and what your employer pays on top.")}</p></div>
             <Iceberg label={t("Iceberg: {net} take-home above the water; {you} paid by you and {employer} paid by your employer below it.", { net: mxn(result.takeHome), you: mxn(youPay), employer: mxn(result.social.employer.total) })} groups={[
               { title: t("What you take home"), parts: [{ label: t("Take-home pay"), amount: result.takeHome, value: mxn(result.takeHome), color: 'var(--glow-2)' }] },
               { title: t("What you pay"), parts: [{ label: t("ISR"), amount: result.withheld, value: mxn(result.withheld), color: 'var(--glow-1)' }, { label: t("IMSS (your share)"), amount: result.social.employee, value: mxn(result.social.employee), color: 'color-mix(in oklab, var(--glow-1) 55%, var(--card))' }] },
@@ -73,10 +73,9 @@ function IsrCalculatorContent() {
             ]} />
           </div>
           <Insights items={[
-            { label: t("ISR withheld"), value: mxn(result.withheld) },
             { label: t("Effective rate on your pay"), value: percent(result.income > 0 ? youPay / result.income : 0) },
             { label: t("Real rate, counting your employer's part"), value: percent(totalCost > 0 ? (youPay + result.social.employer.total) / totalCost : 0) },
-            { label: t("Rate on your next peso"), value: `${result.rate}%` },
+            { label: t("Marginal rate (your next peso)"), value: `${result.rate}%` },
           ]} />
         </> : <Alert variant="destructive"><AlertTitle> {t("Check your numbers")} </AlertTitle><AlertDescription>{t(error)}</AlertDescription></Alert>}
       </div>

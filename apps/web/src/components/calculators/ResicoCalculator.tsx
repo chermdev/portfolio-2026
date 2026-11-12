@@ -1,13 +1,14 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { LocaleProvider, useTranslation } from '@portfolio/i18n/react';
 import { type Locale } from '@portfolio/i18n';
 import { useResicoStore, useHydrateCalculator, resicoDefaults } from '../../stores/calculators';
 import { RotateCcw, ShieldCheck } from 'lucide-react';
 import { Button } from '@portfolio/ui/components/button';
-import { FieldGroup } from '@portfolio/ui/components/field';
+import { Field, FieldLabel } from '@portfolio/ui/components/field';
+import { Switch } from '@portfolio/ui/components/switch';
 import { Alert, AlertTitle, AlertDescription } from '@portfolio/ui/components/alert';
 import { resicoTax, resicoAnnualLimit, roundMoney } from '@portfolio/calculators';
-import { NumberField, AmountField, Settings, Receipt, MobileResult, Insights, money } from './Fields';
+import { NumberField, AmountField, Settings, Receipt, MobileResult, Insights, Headline, Assumptions, money } from './Fields';
 function ResicoCalculatorContent() {
   const { t, locale } = useTranslation();
   useHydrateCalculator(useResicoStore);
@@ -24,12 +25,14 @@ function ResicoCalculatorContent() {
   const headline = t("What you keep this month");
   const kept = result ? roundMoney(amount - result.tax) : 0;
   const shown = result ? mxn(kept) : '—';
+  // The companies field only matters to people paid by personas morales, so it opens behind a switch.
+  const [paidByCompanies, setPaidByCompanies] = useState(false);
+  const showCompanies = paidByCompanies || Number(companies) > 0;
   return <div className="tool-workspace">
     <aside ref={inputs} className="tool-pane-inputs" aria-label={t("Inputs")}>
       <AmountField label={t("Income collected this month")} value={income} onChange={value => set('income', value)} currency="MXN" quick={[20000, 40000, 80000]} hint={t("Before VAT. RESICO taxes income when you actually receive it, with no deductions.")} />
-      <FieldGroup>
-        <NumberField label={t("Of that, paid by companies")} suffix="MXN" value={companies} onChange={value => set('companies', value)} max={Math.min(1e9, Math.max(0, Number(income) || 0))} hint={t("Companies (personas morales) withhold part of the ISR when they pay you.")} />
-      </FieldGroup>
+      <Field orientation="horizontal"><Switch id="paid-by-companies" checked={showCompanies} onCheckedChange={value => { setPaidByCompanies(value); if (!value) set('companies', '0'); }} /><FieldLabel htmlFor="paid-by-companies"> {t("Companies pay me")} </FieldLabel></Field>
+      {showCompanies && <NumberField label={t("Of that, paid by companies")} suffix="MXN" value={companies} onChange={value => set('companies', value)} max={Math.min(1e9, Math.max(0, Number(income) || 0))} hint={t("Companies (personas morales) withhold part of the ISR when they pay you.")} />}
       <Settings title={t("Withholding rate")} summary={`${retention}%`} edited={retention !== resicoDefaults().retention}>
         <NumberField label={t("Withholding rate")} suffix="%" value={retention} onChange={value => set('retention', value)} max={100} hint={t("1.25% under Art. 113-J of the ISR law.")} />
       </Settings>
@@ -40,21 +43,20 @@ function ResicoCalculatorContent() {
         {result ? <>
           <div className="grid gap-8 @3xl:grid-cols-2 @3xl:items-start">
             <div className="flex flex-col gap-6">
-              <div ref={headlineRef} className="scroll-mt-28" aria-live="polite" aria-atomic="true"><h2 className="meta">{headline}</h2><p className="result-value mt-1">{shown}</p><p className="text-xs text-muted-foreground">MXN · {t("after ISR")}</p></div>
+              <Headline ref={headlineRef} label={headline} value={shown} note={`MXN · ${t("after ISR")}`} />
               <Receipt segments={[{ label: t("What you keep"), value: kept, color: 'var(--glow-2)' }, { label: t("Withheld by companies"), value: Math.min(result.withheld, result.tax), color: 'var(--glow-3)' }, { label: t("Paid by you"), value: result.payment, color: 'var(--glow-1)' }]} />
               {yearly > resicoAnnualLimit && <Alert><AlertTitle> {t("Above the RESICO limit at this pace")} </AlertTitle><AlertDescription> {t("Twelve months like this add up to {yearly}. RESICO only applies while yearly income stays at or below MXN 3.5 million.", { yearly: mxn(yearly) })} </AlertDescription></Alert>}
-              <p className="text-xs leading-5 text-muted-foreground"> {t("Estimate for individuals with business or professional income. VAT, the annual return, and income from other regimes are not included.")} </p>
+              <Assumptions><p>{t("Estimate for individuals with business or professional income. VAT, the annual return, and income from other regimes are not included.")}</p></Assumptions>
             </div>
             <div className="result-panel gap-4"><h3 className="meta">{t("Breakdown")}</h3><Receipt
               lines={[{ label: t("Income collected"), value: mxn(amount) }, { sign: '−', label: t('ISR at {rate}%', { rate: result.rate }), value: mxn(result.tax) }, { sign: '=', label: t("What you keep"), value: mxn(kept) }]}
               formula={[`${mxn(amount)} × ${result.rate}% = ${mxn(result.tax)}`]} />
-              <h3 className="meta mt-2">{t("How the ISR is paid")}</h3><Receipt
+              {/* Without withholding, the ISR to pay is the same figure as above, so the second receipt only shows when companies withhold. */}
+              {result.withheld > 0 && <><h3 className="meta mt-2">{t("How the ISR is paid")}</h3><Receipt
               lines={[{ label: t("ISR for the month"), value: mxn(result.tax) }, { sign: '−', label: t("Withheld by companies"), value: mxn(result.withheld) }, { sign: '=', label: t("ISR to pay"), value: mxn(result.payment) }, ...(result.credit > 0 ? [{ label: t("Withholding above the tax"), value: mxn(result.credit) }] : [])]}
-              formula={result.withheld > 0 ? [`${mxn(Number(companies))} × ${Number(retention)}% = ${mxn(result.withheld)}`] : []} /></div>
+              formula={[`${mxn(Number(companies))} × ${Number(retention)}% = ${mxn(result.withheld)}`]} /></>}</div>
           </div>
           <Insights items={[
-            { label: t("ISR to pay this month"), value: mxn(result.payment) },
-            { label: t("Rate for this month"), value: `${result.rate}%` },
             { label: result.headroom === null ? t("Rate band") : t("Income left at this rate"), value: result.headroom === null ? t("Top band") : mxn(result.headroom) },
             { label: t("Yearly income at this pace"), value: mxn(yearly) },
           ]} />

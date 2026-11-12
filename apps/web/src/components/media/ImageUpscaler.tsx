@@ -97,7 +97,8 @@ function ImageUpscalerContent() {
 
   return <div className="tool-workspace">
     <aside className="tool-pane-inputs" aria-label={t("Inputs")}>
-      <Dropzone accept="image/*,.heic,.heif" onFiles={choose}><span className="font-medium text-foreground">{source ? t("Choose another image") : t("Drop an image or choose a file")}</span><span className="meta">{t('JPEG, PNG, WebP · up to {max} px', { max: maxSide })}</span></Dropzone>
+      {/* With nothing loaded, the large drop target in the result pane takes over on desktop. */}
+      <Dropzone accept="image/*,.heic,.heif" onFiles={choose} className={source ? undefined : 'lg:hidden'}><span className="font-medium text-foreground">{source ? t("Choose another image") : t("Drop an image or choose a file")}</span><span className="meta">{t('JPEG, PNG, WebP · up to {max} px', { max: maxSide })}</span></Dropzone>
       <Field><FieldLabel id="upscale-model">{t("Mode")}</FieldLabel>
         <ToggleGroup type="single" variant="outline" className="grid w-full grid-cols-2" aria-labelledby="upscale-model" value={model} onValueChange={value => { if (value) set('upscaleModel', value as UpscaleModel); }} disabled={working}>
           <ToggleGroupItem value="fast" className="h-11 sm:h-9"><Zap aria-hidden="true" /> {t("Fast")}</ToggleGroupItem>
@@ -111,15 +112,14 @@ function ImageUpscalerContent() {
         <FieldDescription>{source ? <span className="tabular-nums">{dims(source.width, source.height)} → {dims(source.width * scale, source.height * scale)}</span> : scale === 1 ? t("Keeps the resolution and only improves sharpness.") : t("Enlarges the image and fills in detail.")}</FieldDescription></Field>
       {working
         ? <Button variant="outline" size="lg" className="h-11" onClick={() => abort.current?.abort()}><X data-icon="inline-start" /> {t("Cancel")}</Button>
-        : <Button size="lg" className="h-11" disabled={!source} onClick={enhance}><WandSparkles data-icon="inline-start" /> {result && !outdated ? t("Enhance again") : t("Enhance image")}</Button>}
-      {device && <p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"><Cpu aria-hidden="true" className="mt-0.5 shrink-0" size={16} /> {device === 'webgpu' ? t("Runs on this device’s GPU.") : t("This browser can’t use the GPU (WebGPU), so the processor does the work and it takes much longer. Chrome or Edge use the GPU.")}</p>}
+        : source && <Button size="lg" className="h-11" onClick={enhance}><WandSparkles data-icon="inline-start" /> {result && !outdated ? t("Enhance again") : t("Enhance image")}</Button>}
+      {device && <p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"><Cpu aria-hidden="true" className="mt-0.5 shrink-0" size={16} /> {device === 'webgpu' ? t("Runs on this device’s GPU.") : t("No GPU in this browser, so it takes much longer. Chrome and Edge use the GPU.")}</p>}
       <div className="mt-auto flex flex-col items-start gap-3 border-t pt-5"><p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"><ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0" size={16} /> {t("Images are enhanced on this device and never uploaded. The last image, its result, and your options are saved here.")}</p><Button variant="ghost" size="sm" className="-ml-2.5 h-11 sm:h-8" onClick={startOver} disabled={!source && model === 'fast' && scale === 2}><RotateCcw aria-hidden="true" /> {t("Start over")}</Button></div>
     </aside>
-    <section ref={resultPane} className="tool-pane-result scroll-mt-4" aria-label={t("Enhanced image")}>
-      {!source ? <div className="flex h-full min-h-64 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed p-8 text-center text-muted-foreground">
-        <BlurToSharp className="mb-2" /><p className="font-medium text-foreground">{t("No image yet")}</p>
-        <p className="max-w-sm text-sm">{t("Add an AI-generated or low-resolution image on the left, then enhance it. You’ll compare the before and after here.")}</p>
-        {error && <p className="mt-2 max-w-sm text-sm text-destructive">{error}</p>}
+    <section ref={resultPane} className={source || error ? 'tool-pane-result scroll-mt-4' : 'tool-pane-result scroll-mt-4 max-lg:hidden'} aria-label={t("Enhanced image")}>
+      {!source ? <div className="flex h-full flex-col gap-4">
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <Dropzone accept="image/*,.heic,.heif" onFiles={choose} className="min-h-64 flex-1 max-lg:hidden" icon={<BlurToSharp className="mb-2" />}><span className="font-medium text-foreground">{t("Drop an image or choose a file")}</span><span className="meta">{t('JPEG, PNG, WebP · up to {max} px', { max: maxSide })}</span><span className="mt-2 max-w-sm">{t("Use an AI-generated or low-resolution image. You’ll compare the before and after here.")}</span></Dropzone>
       </div> : <div className="flex flex-col gap-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div aria-live="polite"><h2 className="meta">{result ? t("Enhanced") : t("Original")}</h2>

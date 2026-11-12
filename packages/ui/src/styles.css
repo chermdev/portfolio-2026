@@ -197,6 +197,19 @@
   .receipt-bar { @apply flex h-2.5 gap-0.5 overflow-hidden rounded-full; }
   .receipt-bar > span { min-width: 3px; }
   .receipt-formula { @apply rounded-lg bg-background/70 px-3 py-2 font-mono text-xs leading-6 text-muted-foreground; }
+  /* Formula and assumptions fold into one line; the text stays in the page and opens in place. */
+  .receipt-fold > summary { @apply flex w-fit cursor-pointer list-none items-center gap-1 rounded-sm text-xs text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring; }
+  .receipt-fold > summary::-webkit-details-marker { display: none; }
+  .receipt-fold > summary svg { @apply transition-transform duration-150; }
+  .receipt-fold[open] > summary svg { @apply rotate-90; }
+  .receipt-fold[open] > summary { @apply mb-2; }
+  /* Cents step back so the whole amount reads at a glance. */
+  .result-cents { @apply text-muted-foreground; font-size: 0.6em; letter-spacing: -0.02em; }
+  /* Insights are extra answers: label left, value right, one hairline between rows. */
+  .insights { @apply grid gap-x-8 @xl:grid-cols-2; }
+  .insights > div { @apply flex items-baseline justify-between gap-4 border-b py-3; }
+  .insights dt { @apply text-sm text-muted-foreground; }
+  .insights dd { @apply shrink-0 font-medium tabular-nums; }
   .mobile-result { @apply fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-4 border-t bg-background/90 py-3 backdrop-blur; padding-inline: var(--page-gutter); transition: translate 150ms var(--ease-out); }
   .mobile-result[data-visible="false"] { translate: 0 100%; }
   @media (prefers-reduced-motion: reduce) { .mobile-result { transition: none; } }
@@ -205,17 +218,31 @@
      under the h-24 header, and the page itself scrolls: no inner scroll bars. */
   .tool-app { @apply flex flex-col gap-5 pt-5 pb-6; max-width: var(--layout-max); margin-inline: auto; padding-inline: var(--page-gutter); }
   .tool-toolbar { @apply flex flex-wrap items-center gap-3; }
-  /* On small screens the switcher becomes a row of app tabs above the title; from sm up it sits at the right of the toolbar. */
-  .tool-switcher { @apply order-first flex w-full flex-wrap items-center gap-2 border-b pb-3 sm:order-none sm:w-auto sm:border-b-0 sm:pb-0; }
+  /* On small screens the title comes first and the switcher moves below the workspace ("More tools"),
+     so the first screen is the tool itself. From sm up it sits at the right of the toolbar. */
+  .tool-switcher { @apply flex flex-wrap items-center gap-2; }
+  @media (max-width: 39.999rem) {
+    .tool-app { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+    /* React islands are display: contents, so the workspace is placed by its own class too. */
+    .tool-app > *, .tool-workspace { grid-column: 1 / -1; }
+    .tool-toolbar { display: contents; }
+    .tool-heading { grid-column: 1; }
+    .tool-help { grid-column: 2; }
+    .tool-switcher { @apply order-last border-t pt-5; grid-column: 1 / -1; }
+  }
   .tool-switcher a { @apply rounded-[0.9rem] p-1 opacity-60 outline-none transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring; }
   .tool-switcher a[aria-current="page"] { @apply opacity-100 ring-2 ring-foreground/20; }
-  .tool-workspace { @apply grid overflow-hidden rounded-2xl border; grid-template-columns: minmax(0, 1fr); }
-  .tool-pane-inputs { @apply flex flex-col gap-6 border-b bg-secondary/40 p-5 sm:p-6; }
-  .tool-pane-result { @apply @container min-w-0 p-5 sm:p-8; }
+  /* `overflow: clip` (not hidden) keeps the rounded frame without breaking the sticky inputs pane. */
+  .tool-workspace { @apply grid overflow-clip rounded-2xl border bg-secondary/40; grid-template-columns: minmax(0, 1fr); }
+  .tool-pane-inputs { @apply flex flex-col gap-6 border-b p-5 sm:p-6; }
+  .tool-pane-result { @apply @container min-w-0 bg-background p-5 sm:p-8; }
   @media (min-width: 64rem) {
     .tool-app { min-height: calc(100dvh - 6rem); }
     .tool-workspace { @apply flex-1; grid-template-columns: 23rem minmax(0, 1fr); }
-    .tool-pane-inputs { @apply border-r border-b-0; }
+    /* The inputs stay in view while the result scrolls. ToolLayout sets --inputs-top: a pane taller than
+       the screen gets a negative offset, so it scrolls to its end before it sticks. */
+    .tool-pane-inputs { @apply sticky self-start border-b-0; top: var(--inputs-top, 1.5rem); }
+    .tool-pane-result { @apply border-l; }
   }
   /* Media tools: a drop target for files, and a stage that shows a frame with a crop box over it.
      The crop box is positioned in percentages of the frame, so it follows the canvas at any size. */

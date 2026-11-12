@@ -1,18 +1,19 @@
 import { useTranslation } from '@portfolio/i18n/react';
 import { type Locale } from '@portfolio/i18n';
-import { useEffect, useId, useState, type ReactNode, type RefObject } from 'react';
-import { ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { useEffect, useId, useState, type ReactNode, type Ref, type RefObject } from 'react';
+import { ChevronDown, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { NumberInput, useNumberInput } from '@portfolio/ui/components/number-input';
 import { groupNumber } from '@portfolio/ui/lib/number';
 import { Button } from '@portfolio/ui/components/button';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@portfolio/ui/components/collapsible';
 import { Field, FieldLabel, FieldDescription, FieldError } from '@portfolio/ui/components/field';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '@portfolio/ui/components/select';
-export function NumberField({ label, value, onChange, suffix, hint, min = 0, max = 1e9, step = 0.01 }: { label: string; value: string | number; onChange: (value: string) => void; suffix?: string; hint?: string; min?: number; max?: number; step?: number }) {
+/** `addon` sits beside the input, such as a unit picker. */
+export function NumberField({ label, value, onChange, suffix, hint, addon, min = 0, max = 1e9, step = 0.01 }: { label: string; value: string | number; onChange: (value: string) => void; suffix?: string; hint?: string; addon?: ReactNode; min?: number; max?: number; step?: number }) {
   const id = useId();
   const { t } = useTranslation();
   const invalid = value === '' || !Number.isFinite(Number(value)) || Number(value) < min || Number(value) > max || (step >= 1 && Math.abs((Number(value) - min) / step - Math.round((Number(value) - min) / step)) > 1e-6);
-  return <Field data-invalid={invalid || undefined}><FieldLabel htmlFor={id}>{label}{suffix && <span className="ml-auto text-xs text-muted-foreground">{suffix}</span>}</FieldLabel><NumberInput id={id} value={value} onValueChange={onChange} aria-invalid={invalid} aria-describedby={invalid ? `${id}-error` : hint ? `${id}-hint` : undefined} />{hint && <FieldDescription id={`${id}-hint`}>{hint}</FieldDescription>}{invalid && <FieldError id={`${id}-error`}>{t('Enter a number from {min} to {max}{step}.', { min: groupNumber(String(min)), max: groupNumber(String(max)), step: step >= 1 ? ' ' + t('in steps of {step}', { step }) : '' })}</FieldError>}</Field>;
+  return <Field data-invalid={invalid || undefined}><FieldLabel htmlFor={id}>{label}{suffix && <span className="ml-auto text-xs text-muted-foreground">{suffix}</span>}</FieldLabel>{(() => { const input = <NumberInput id={id} className={addon ? 'min-w-0 flex-1' : undefined} value={value} onValueChange={onChange} aria-invalid={invalid} aria-describedby={invalid ? `${id}-error` : hint ? `${id}-hint` : undefined} />; return addon ? <div className="flex gap-2">{input}{addon}</div> : input; })()}{hint && <FieldDescription id={`${id}-hint`}>{hint}</FieldDescription>}{invalid && <FieldError id={`${id}-error`}>{t('Enter a number from {min} to {max}{step}.', { min: groupNumber(String(min)), max: groupNumber(String(max)), step: step >= 1 ? ' ' + t('in steps of {step}', { step }) : '' })}</FieldError>}</Field>;
 }
 export function SelectField({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: { value: string; label: string }[] }) {
   const id = useId();
@@ -47,7 +48,7 @@ export type ReceiptLine = { label: string; value: string; sign?: '−' | '+' | '
 export type ReceiptSegment = { label: string; value: number; color: string };
 /** The result read as a receipt: where the money goes (bar), the itemized math, and the formula with the user's numbers. */
 export function Receipt({ lines = [], segments = [], formula = [] }: { lines?: ReceiptLine[]; segments?: ReceiptSegment[]; formula?: string[] }) {
-  const { locale } = useTranslation();
+  const { t, locale } = useTranslation();
   const shown = segments.filter(segment => segment.value > 0);
   const total = shown.reduce((sum, segment) => sum + segment.value, 0);
   const share = (value: number) => new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { style: 'percent', maximumFractionDigits: 1 }).format(value / total);
@@ -55,7 +56,7 @@ export function Receipt({ lines = [], segments = [], formula = [] }: { lines?: R
     {total > 0 && segments.every(segment => segment.value >= 0) && <div><div className="receipt-bar" role="img" aria-label={shown.map(segment => `${segment.label} ${share(segment.value)}`).join(', ')}>{shown.map(segment => <span key={segment.label} style={{ flexGrow: segment.value, background: segment.color }} />)}</div>
       <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground" aria-hidden="true">{shown.map(segment => <li key={segment.label} className="flex items-center gap-1.5"><span className="size-2 rounded-full" style={{ background: segment.color }} />{segment.label} {share(segment.value)}</li>)}</ul></div>}
     {lines.length > 0 && <dl className="receipt">{lines.map(line => <div key={line.label} className={line.sign === '=' ? 'receipt-row receipt-total' : 'receipt-row'}><dt>{line.sign && <span aria-hidden="true">{line.sign} </span>}{line.label}</dt><dd>{line.value}</dd></div>)}</dl>}
-    {formula.length > 0 && <div className="receipt-formula">{formula.map(line => <p key={line}>{line}</p>)}</div>}
+    {formula.length > 0 && <Fold label={t("Formula")}><div className="receipt-formula">{formula.map(line => <p key={line}>{line}</p>)}</div></Fold>}
   </div>;
 }
 /** On small screens, keep the answer in view while the inputs are on screen and the full result is not. */
@@ -72,9 +73,21 @@ export function MobileResult({ label, value, inputs, result }: { label: string; 
   const visible = state.inputs && !state.result;
   return <div className="mobile-result lg:hidden" data-visible={visible} aria-hidden={!visible}><div className="min-w-0"><p className="meta">{label}</p><p className="truncate text-xl font-medium tabular-nums">{value}</p></div><Button size="sm" variant="outline" className="h-11" tabIndex={visible ? 0 : -1} onClick={() => { const target = result.current; if (!target) return; target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); target.tabIndex = -1; target.focus({ preventScroll: true }); }}>{t("See breakdown")}</Button></div>;
 }
-/** Extra answers derived from the same inputs, so the result says more than one number. */
+/** Extra answers derived from the same inputs. Only numbers the receipt doesn't already show belong here. */
 export function Insights({ items }: { items: { label: string; value: string }[] }) {
-  // Cards in a row stretch to the same height and the value sits at the bottom, so values line up when a label wraps.
-  // Four cards go 2×2 instead of leaving one alone on a second row.
-  return <dl className={items.length === 4 ? "grid gap-3 @xl:grid-cols-2" : "grid gap-3 @xl:grid-cols-3"}>{items.map(item => <div key={item.label} className="flex flex-col rounded-xl border bg-card p-4"><dt className="text-xs leading-5 text-muted-foreground">{item.label}</dt><dd className="mt-auto pt-1 text-lg font-medium tabular-nums">{item.value}</dd></div>)}</dl>;
+  return <dl className="insights">{items.map(item => <div key={item.label}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl>;
+}
+/** One line that opens in place: the formula, or what an estimate leaves out. */
+export function Fold({ label, children }: { label: string; children: ReactNode }) {
+  return <details className="receipt-fold"><summary><ChevronRight aria-hidden="true" size={14} strokeWidth={1.5} />{label}</summary>{children}</details>;
+}
+/** What the estimate leaves out, folded under the result instead of between the answer and the receipt. */
+export function Assumptions({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
+  return <Fold label={t("Estimate · what it leaves out")}><div className="flex flex-col gap-2 text-xs leading-5 text-muted-foreground">{children}</div></Fold>;
+}
+/** The headline answer. Cents step back so the amount reads at a glance. */
+export function Headline({ ref, label, value, note }: { ref?: Ref<HTMLDivElement>; label: string; value: string; note: string }) {
+  const [, whole = value, cents = ''] = value.match(/^(.*\d)([.,]\d{2})$/) ?? [];
+  return <div ref={ref} className="scroll-mt-28" aria-live="polite" aria-atomic="true"><h2 className="meta">{label}</h2><p className="result-value mt-1">{whole}{cents && <span className="result-cents">{cents}</span>}</p><p className="text-xs text-muted-foreground">{note}</p></div>;
 }

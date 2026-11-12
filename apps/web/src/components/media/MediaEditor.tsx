@@ -91,10 +91,10 @@ export function EditControls({ size, edits, onChange }: { size: Size; edits: Edi
 }
 
 /** A click-or-drop target for files. The input stays in the label, so keyboard and screen readers use it as a normal file field. */
-export function Dropzone({ accept, multiple = false, onFiles, children }: { accept: string; multiple?: boolean; onFiles: (files: File[]) => void; children: ReactNode }) {
+export function Dropzone({ accept, multiple = false, onFiles, children, className, icon = <Upload aria-hidden="true" size={22} strokeWidth={1.5} /> }: { accept: string; multiple?: boolean; onFiles: (files: File[]) => void; children: ReactNode; className?: string; icon?: ReactNode }) {
   const [active, setActive] = useState(false);
-  return <label className="dropzone" data-active={active} onDragOver={event => { event.preventDefault(); setActive(true); }} onDragLeave={() => setActive(false)} onDrop={event => { event.preventDefault(); setActive(false); onFiles([...event.dataTransfer.files]); }}>
-    <Upload aria-hidden="true" size={22} strokeWidth={1.5} />
+  return <label className={className ? `dropzone ${className}` : 'dropzone'} data-active={active} onDragOver={event => { event.preventDefault(); setActive(true); }} onDragLeave={() => setActive(false)} onDrop={event => { event.preventDefault(); setActive(false); onFiles([...event.dataTransfer.files]); }}>
+    {icon}
     {children}
     <input type="file" className="sr-only" accept={accept} multiple={multiple} onChange={event => { onFiles([...(event.target.files ?? [])]); event.target.value = ''; }} />
   </label>;

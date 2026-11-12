@@ -8,7 +8,7 @@ import { Switch } from '@portfolio/ui/components/switch';
 import { Alert, AlertTitle, AlertDescription } from '@portfolio/ui/components/alert';
 import { ToggleGroup, ToggleGroupItem } from '@portfolio/ui/components/toggle-group';
 import { stripePresets, stripeFees, grossForNet, type Currency, type RadarPlan, type FeeConfig } from '@portfolio/calculators';
-import { NumberField, SelectField, AmountField, Settings, Receipt, MobileResult, Insights, money } from './Fields';
+import { NumberField, SelectField, AmountField, Settings, Receipt, MobileResult, Insights, Headline, money } from './Fields';
 import { useStripeStore, useHydrateCalculator, feeDefaults as defaults, type Draft } from '../../stores/calculators';
 function StripeCalculatorContent() {
   const { t, locale } = useTranslation();
@@ -56,7 +56,7 @@ function StripeCalculatorContent() {
   }
   return <div className="tool-workspace">
     <aside ref={inputs} className="tool-pane-inputs" aria-label={t("Inputs")}>
-      <SelectField label={t("Account & currency preset")} value={currency} onChange={changePreset} options={Object.entries(stripePresets).map(([value, preset]) => ({ value, label: t(preset.label) }))} />
+      <SelectField label={t("Account")} value={currency} onChange={changePreset} options={Object.entries(stripePresets).map(([value, preset]) => ({ value, label: t(preset.label) }))} />
       <ToggleGroup type="single" value={mode} onValueChange={changeMode} variant="outline" className="w-full" aria-label={t("Calculation direction")}><ToggleGroupItem value="charge" className="h-auto min-h-11 flex-1 whitespace-normal py-2 text-center"> {t("I charge")} </ToggleGroupItem><ToggleGroupItem value="receive" className="h-auto min-h-11 flex-1 whitespace-normal py-2 text-center"> {t("I want to receive")} </ToggleGroupItem></ToggleGroup>
       <AmountField label={mode === 'charge' ? t("Payment amount") : t("Desired remaining amount")} value={amount} onChange={setAmount} currency={currency} quick={currency === 'MXN' ? [500, 1000, 5000] : [50, 100, 500]} />
       <div className="flex flex-col gap-4"><Field orientation="horizontal"><Switch id="international" checked={international} onCheckedChange={setInternational} /><FieldLabel htmlFor="international"> {t("International card")} </FieldLabel></Field><Field orientation="horizontal"><Switch id="conversion" checked={conversion} onCheckedChange={setConversion} /><FieldLabel htmlFor="conversion"> {t("Currency conversion required")} </FieldLabel></Field></div>
@@ -76,7 +76,7 @@ function StripeCalculatorContent() {
         {result ? <>
           <div className="grid gap-8 @3xl:grid-cols-2 @3xl:items-start">
             <div className="flex flex-col gap-6">
-              <div ref={receipt} className="scroll-mt-28" aria-live="polite" aria-atomic="true"><h2 className="meta">{headline}</h2><p className="result-value mt-1">{shown}</p><p className="text-xs text-muted-foreground">{currency} {t("· per successful payment")}</p></div>
+              <Headline ref={receipt} label={headline} value={shown} note={`${currency} ${t("· per successful payment")}`} />
               <Receipt segments={[{ label: t("You keep"), value: result.net, color: 'var(--glow-2)' }, { label: t("Processing fees"), value: result.processing, color: 'var(--glow-1)' }, { label: 'Radar', value: result.radar, color: 'var(--glow-3)' }, { label: t("Other costs"), value: result.extra, color: 'var(--chart-4)' }, { label: t("Fee tax"), value: result.tax, color: 'var(--muted-foreground)' }]} />
               {result.net < 0 && <p className="text-sm text-destructive"> {t("The fees exceed this payment. Increase the charge or adjust the rates.")} </p>}
             </div>

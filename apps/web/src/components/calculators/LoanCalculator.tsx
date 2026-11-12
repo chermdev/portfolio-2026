@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { LocaleProvider, useTranslation } from '@portfolio/i18n/react';
 import { type Locale } from '@portfolio/i18n';
 import { useAutoStore, useMortgageStore, useHydrateCalculator } from '../../stores/calculators';
@@ -10,7 +10,7 @@ import { ToggleGroup, ToggleGroupItem } from '@portfolio/ui/components/toggle-gr
 import { Alert, AlertTitle, AlertDescription } from '@portfolio/ui/components/alert';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@portfolio/ui/components/table';
 import { loanScenario, amortization } from '@portfolio/calculators';
-import { NumberField, SelectField, AmountField, Settings, Receipt, MobileResult, Insights, money } from './Fields';
+import { NumberField, SelectField, AmountField, Settings, Receipt, MobileResult, Insights, Headline, Assumptions, money } from './Fields';
 function LoanCalculatorContent({ kind }: { kind: 'auto' | 'home' }) {
   const { t, locale } = useTranslation();
   const home = kind === 'home';
@@ -61,26 +61,36 @@ function LoanCalculatorContent({ kind }: { kind: 'auto' | 'home' }) {
   const r = Number(rate) / 1200;
   const number = (value: number, digits = 2) => new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits || 6 }).format(value);
   const tradeInValue = home ? 0 : Number(tradeIn);
+  // Term presets as year chips; "Other" opens the exact number of months.
+  const terms = home ? [120, 180, 240, 300, 360] : [12, 24, 36, 48, 60, 72, 84];
+  const [customTerm, setCustomTerm] = useState(false);
+  const custom = customTerm || !terms.includes(Number(months));
   const insights = result ? [
     { label: t("Total interest"), value: money(result.interest, currency, locale) },
     { label: t("Total cost incl. down payment"), value: money(result.total, currency, locale) },
     ...(deposits.length > 0
       ? [{ label: t("Interest saved"), value: money(interestSaved, currency, locale) }, { label: t("Payments saved"), value: String(Math.max(0, baseline.length - rows.length)) }]
-      : [{ label: t("Final payment (rounding adjusted)"), value: money(rows.at(-1)?.payment ?? 0, currency, locale) }]),
+      : []),
   ] : [];
   return <div className="tool-workspace">
     <aside ref={inputs} className="tool-pane-inputs" aria-label={t("Inputs")}>
       <ToggleGroup type="single" value={mode} onValueChange={value => { if (value) setMode(value as 'payment' | 'power'); }} variant="outline" className="w-full" aria-label={t("Loan calculation mode")}><ToggleGroupItem value="payment" className="h-auto min-h-11 flex-1 whitespace-normal py-2 text-center"> {t("Monthly payment")} </ToggleGroupItem><ToggleGroupItem value="power" className="h-auto min-h-11 flex-1 whitespace-normal py-2 text-center"> {t("Purchasing power")} </ToggleGroupItem></ToggleGroup>
-      <SelectField label={t("Currency")} value={currency} onChange={setCurrency} options={[{ value: 'MXN', label: t("Mexican peso · MXN") }, { value: 'USD', label: t("US dollar · USD") }]} />
       <AmountField label={mode === 'payment' ? home ? t("Home price") : t("Vehicle price") : t("Monthly payment budget")} value={mode === 'payment' ? price : budget} onChange={mode === 'payment' ? setPrice : setBudget} currency={currency} quick={quick} />
       <FieldGroup>
-        {!home && <SelectField label={t("Down payment (enganche) format")} value={downType} onChange={value => { setDownType(value as 'percent' | 'cash'); setDown(value === 'percent' ? '20' : '90000'); }} options={[{ value: 'percent', label: t("Percentage of purchase price") }, { value: 'cash', label: t('Fixed amount in {currency}', { currency }) }]} />}
-        <NumberField label={t("Down payment (enganche)")} value={down} onChange={setDown} suffix={downType === 'percent' ? '%' : currency} min={home ? 10 : 0} max={downType === 'percent' ? 95 : 1e9} step={home ? 5 : 0.01} />
-        {downType === 'percent' && <Field><FieldLabel className="sr-only" htmlFor="down-slider"> {t("Down payment percentage slider")} </FieldLabel><Slider id="down-slider" aria-label={t("Down payment percentage")} value={[Number(down) || (home ? 10 : 0)]} onValueChange={value => setDown(String(value[0]))} min={home ? 10 : 0} max={95} step={5} /><FieldDescription>{home ? t("Minimum 10%, adjustable in 5% steps.") : t("Adjust in 5% steps, or enter an exact percentage above.")}</FieldDescription></Field>}
-        {!home && <NumberField label={t("Trade-in value")} suffix={currency} value={tradeIn} onChange={setTradeIn} hint={t("Net equity after any existing vehicle loan is paid off.")} />}
-        <div className="grid items-end gap-5 sm:grid-cols-2 lg:grid-cols-1"><SelectField label={t("Loan term preset")} value={[...(home ? [120, 180, 240, 300, 360] : [12, 24, 36, 48, 60, 72, 84])].includes(Number(months)) ? months : 'custom'} onChange={value => { if (value !== 'custom') setMonths(value); }} options={[...(home ? [120, 180, 240, 300, 360] : [12, 24, 36, 48, 60, 72, 84]).map(value => ({ value: String(value), label: t(value === 12 ? '{years} year · {months} months' : '{years} years · {months} months', { years: value / 12, months: value }) })), { value: 'custom', label: t("Custom term") }]} /><NumberField label={t("Term in months")} value={months} onChange={setMonths} min={1} max={600} step={1} /></div>
-        <NumberField label={t("Annual interest rate")} value={rate} onChange={setRate} max={100} suffix="%" hint={t("Illustrative default. Replace with your lender’s nominal annual rate, not CAT or APR including fees.")} />
+        <NumberField label={t("Down payment (enganche)")} value={down} onChange={setDown} suffix={home ? '%' : undefined} min={home ? 10 : 0} max={downType === 'percent' ? 95 : 1e9} step={home ? 5 : 0.01}
+          addon={home ? undefined : <ToggleGroup type="single" variant="outline" value={downType} onValueChange={value => { if (!value) return; setDownType(value as 'percent' | 'cash'); setDown(value === 'percent' ? '20' : '90000'); }} className="self-stretch" aria-label={t("Down payment (enganche) format")}><ToggleGroupItem value="percent" className="h-full px-3" aria-label={t("Percentage of purchase price")}>%</ToggleGroupItem><ToggleGroupItem value="cash" className="h-full px-3" aria-label={t('Fixed amount in {currency}', { currency })}>{currency}</ToggleGroupItem></ToggleGroup>} />
+        {downType === 'percent' && <Field><FieldLabel className="sr-only" htmlFor="down-slider"> {t("Down payment percentage slider")} </FieldLabel><Slider id="down-slider" aria-label={t("Down payment percentage")} value={[Number(down) || (home ? 10 : 0)]} onValueChange={value => setDown(String(value[0]))} min={home ? 10 : 0} max={95} step={5} />{home && <FieldDescription>{t("Minimum 10%, adjustable in 5% steps.")}</FieldDescription>}</Field>}
+        <Field><FieldLabel id="loan-term">{t("Loan term")}<span className="ml-auto text-xs text-muted-foreground">{t("years")}</span></FieldLabel>
+          <ToggleGroup type="single" variant="outline" className="w-full" aria-labelledby="loan-term" value={custom ? 'custom' : String(Number(months))} onValueChange={value => { if (!value) return; setCustomTerm(value === 'custom'); if (value !== 'custom') setMonths(value); }}>{terms.map(value => <ToggleGroupItem key={value} value={String(value)} className="h-11 flex-1 px-0 tabular-nums sm:h-9" aria-label={t(value === 12 ? '{years} year · {months} months' : '{years} years · {months} months', { years: value / 12, months: value })}>{value / 12}</ToggleGroupItem>)}<ToggleGroupItem value="custom" className="h-11 flex-1 px-2 sm:h-9">{t("Other")}</ToggleGroupItem></ToggleGroup></Field>
+        {custom && <NumberField label={t("Term in months")} value={months} onChange={setMonths} min={1} max={600} step={1} />}
+        <NumberField label={t("Annual interest rate")} value={rate} onChange={setRate} max={100} suffix="%" hint={t("Example rate. Use your lender’s nominal annual rate, not CAT or APR.")} />
       </FieldGroup>
+      <Settings title={t("More options")} edited={currency !== 'MXN' || (!home && Number(tradeIn) > 0)} summary={home ? currency : `${currency} · ${t("Trade-in value")} ${money(Number(tradeIn) || 0, currency, locale)}`}>
+        <FieldGroup>
+          <SelectField label={t("Currency")} value={currency} onChange={setCurrency} options={[{ value: 'MXN', label: t("Mexican peso · MXN") }, { value: 'USD', label: t("US dollar · USD") }]} />
+          {!home && <NumberField label={t("Trade-in value")} suffix={currency} value={tradeIn} onChange={setTradeIn} hint={t("Net equity after any existing vehicle loan is paid off.")} />}
+        </FieldGroup>
+      </Settings>
       <Settings title={t("Extra principal payments")} edited={deposits.length > 0} summary={deposits.length ? t(deposits.length === 1 ? '{n} deposit · reduce the {target}' : '{n} deposits · reduce the {target}', { n: deposits.length, target: strategy === 'term' ? t("term") : t("payment") }) : t("No extra payments yet")}>
         <FieldGroup>
           <Field><FieldLabel> {t("What should your deposits reduce?")} </FieldLabel><ToggleGroup type="single" value={strategy} onValueChange={value => { if (value) setStrategy(value as 'term' | 'payment'); }} variant="outline" className="w-full" aria-label={t("Principal deposit strategy")}><ToggleGroupItem value="term" className="h-auto min-h-11 flex-1 whitespace-normal py-2 text-center"> {t("Number of payments")} </ToggleGroupItem><ToggleGroupItem value="payment" className="h-auto min-h-11 flex-1 whitespace-normal py-2 text-center"> {t("Monthly payment")} </ToggleGroupItem></ToggleGroup><FieldDescription>{strategy === 'term' ? t("Keep the scheduled payment and pay off the loan sooner.") : t("Recalculate the next monthly payment over the original remaining term.")}</FieldDescription></Field>
@@ -96,9 +106,9 @@ function LoanCalculatorContent({ kind }: { kind: 'auto' | 'home' }) {
         {result ? <>
           <div className="grid gap-8 @3xl:grid-cols-2 @3xl:items-start">
             <div className="flex flex-col gap-6">
-              <div ref={headlineRef} className="scroll-mt-28" aria-live="polite" aria-atomic="true"><h2 className="meta">{headline}</h2><p className="result-value mt-1">{shown}</p><p className="text-xs text-muted-foreground">{currency} · {mode === 'payment' ? t("principal & interest") : t("estimated purchase price")}</p></div>
+              <Headline ref={headlineRef} label={headline} value={shown} note={`${currency} · ${mode === 'payment' ? t("principal & interest") : t("estimated purchase price")}`} />
               <Receipt segments={[{ label: t("Down payment"), value: result.downCash, color: 'var(--glow-3)' }, { label: t("Trade-in equity"), value: tradeInValue, color: 'var(--chart-4)' }, { label: t("Amount financed"), value: result.principal, color: 'var(--glow-2)' }, { label: t("Total interest"), value: result.interest, color: 'var(--glow-1)' }]} />
-              <p className="text-xs leading-5 text-muted-foreground">{t('Estimates assume a fixed interest rate and monthly payments. Insurance, taxes, origination fees, {costs} are not included. Changing currency changes the label, not the exchange value.', { costs: home ? t("notary and closing costs") : t("registration and dealer fees") })}</p>
+              <Assumptions><p>{t('Estimates assume a fixed interest rate and monthly payments. Insurance, taxes, origination fees, {costs} are not included. Changing currency changes the label, not the exchange value.', { costs: home ? t("notary and closing costs") : t("registration and dealer fees") })}</p></Assumptions>
             </div>
             <div className="result-panel gap-4"><h3 className="meta">{t("Breakdown")}</h3><Receipt
               lines={[{ label: t("Purchase price"), value: money(result.price, currency, locale) }, { sign: '−', label: t("Down payment"), value: money(result.downCash, currency, locale) }, ...(tradeInValue > 0 ? [{ sign: '−' as const, label: t("Trade-in equity"), value: money(tradeInValue, currency, locale) }] : []), { sign: '=', label: t("Amount financed"), value: money(result.principal, currency, locale) }, { label: deposits.length ? t("Initial monthly payment") : t("Monthly payment"), value: money(result.payment, currency, locale) }, ...(deposits.length > 0 ? [{ label: t("Extra principal applied"), value: money(deposited, currency, locale) }, { label: t("Number of payments"), value: String(rows.length) }] : []), ...(strategy === 'payment' && firstDepositIndex >= 0 ? [{ label: t("Payment after first deposit"), value: money(rows[firstDepositIndex + 1]?.payment ?? 0, currency, locale) }] : [])]}
