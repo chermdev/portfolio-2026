@@ -1,6 +1,7 @@
 ---
 import { ArrowUpRight } from 'lucide-react';
 import AppIcon from './AppIcon.astro';
+import { BlurToSharp } from './media/BlurToSharp';
 import { tools, upcomingTools } from '@portfolio/site/lib/site';
 import { localeFromPath, translate } from '@portfolio/i18n';
 import { stripeFees, loanScenario, savingsGrowth, salaryIsr, resicoTax, type Compounding, type FeeConfig } from '@portfolio/calculators';
@@ -11,7 +12,7 @@ const t = (text: string, values: Record<string, string | number>) => translate(t
 // Money tools illustrate what their result splits into, without numbers, so the card never reads as a price.
 // Proportions come from each tool's own defaults, so the shape still matches what the tool opens with.
 const keep = 'var(--glow-2)', cost = 'var(--glow-1)';
-function example(icon: string): { parts: SharePart[]; steps?: number[][] } | { caption: string; value: string } {
+function example(icon: string): { parts: SharePart[]; steps?: number[][] } | { caption: string; value: string } | { blur: string } {
   if (icon === 'stripe') {
     const { draft, amount } = stripeDefaults();
     const config = { ...Object.fromEntries(Object.entries(draft).map(([key, value]) => [key, Number(value)])), international: 0, conversion: 0 } as FeeConfig;
@@ -35,7 +36,7 @@ function example(icon: string): { parts: SharePart[]; steps?: number[][] } | { c
   }
   // Media tools have no default result to compute; they show what they can write instead.
   if (icon === 'image') return { caption: t('Converts to', {}), value: 'WebP · JPEG · PNG · AVIF' };
-  if (icon === 'upscale') return { caption: t('Final size', {}), value: t('Same · ×2 · ×4', {}) };
+  if (icon === 'upscale') return { blur: '×1 · ×2 · ×4' };
   if (icon === 'video') return { caption: t('Converts to', {}), value: 'MP4 · WebM' };
   const { initial, monthly, rate, years, compounding } = savingsDefaults();
   const rows = savingsGrowth({ initial: Number(initial), monthly: Number(monthly), annualRate: Number(rate), years: Number(years), compounding: Number(compounding) as Compounding });
@@ -56,6 +57,7 @@ const categories = [...new Set([...tools, ...upcomingTools].map(tool => tool.cat
       </div>
       {'parts' in shown
         ? shown.steps ? <ShareBars className="mt-6" parts={shown.parts} steps={shown.steps} /> : <ShareDonut className="mt-6" parts={shown.parts} />
+        : 'blur' in shown ? <div class="mt-6 flex items-center justify-between gap-4"><BlurToSharp /><p class="meta">{shown.blur}</p></div>
         : <><p class="mt-6 min-h-10 text-xs leading-5 text-muted-foreground">{shown.caption}</p><p class="tool-widget-value">{shown.value}</p></>}
       <p class="mt-3 text-sm leading-6 text-muted-foreground">{tool.description}</p>
     </a>; })}

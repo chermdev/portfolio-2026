@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { LocaleProvider, useTranslation } from '@portfolio/i18n/react';
 import { type Locale } from '@portfolio/i18n';
-import { Cpu, Download, ImageUpscale, RotateCcw, ShieldCheck, WandSparkles, X, Zap } from 'lucide-react';
+import { Cpu, Download, RotateCcw, ShieldCheck, WandSparkles, X, Zap } from 'lucide-react';
 import { Button } from '@portfolio/ui/components/button';
 import { Field, FieldLabel, FieldDescription } from '@portfolio/ui/components/field';
 import { Progress } from '@portfolio/ui/components/progress';
@@ -9,6 +9,7 @@ import { ToggleGroup, ToggleGroupItem } from '@portfolio/ui/components/toggle-gr
 import { useHydrateCalculator, useUpscaleStore } from '../../stores/calculators';
 import { Dropzone, downloadBlob } from './MediaEditor';
 import { CompareView } from './CompareView';
+import { BlurToSharp } from './BlurToSharp';
 import { formatBytes } from './geometry';
 import { clearSaved, detectDevice, loadSaved, maxSide, save, upscale, type Device, type Stage, type Upscaled, type UpscaleModel, type UpscaleScale } from './upscale';
 
@@ -88,7 +89,7 @@ function ImageUpscalerContent() {
   const working = stage !== null;
   const outdated = result && (result.model !== model || result.scale !== scale);
   const dims = (width: number, height: number) => t('{width} × {height} px', { width, height });
-  const scaleLabel = (value: UpscaleScale) => value === 1 ? t("Same size") : `×${value}`;
+  const scaleLabel = (value: UpscaleScale) => `×${value}`;
   const stageText = !stage ? '' : stage.stage === 'download' ? t('Downloading the model, only the first time · {progress}', { progress: `${Math.round(stage.progress * 100)}%` })
     : stage.stage === 'prepare' ? (device === 'webgpu' ? t("Preparing the GPU…") : t("Preparing…"))
     : stage.stage === 'enhance' ? t('Enhancing · {progress}', { progress: `${Math.round(stage.progress * 100)}%` }) : t("Saving the result…");
@@ -116,7 +117,7 @@ function ImageUpscalerContent() {
     </aside>
     <section ref={resultPane} className="tool-pane-result scroll-mt-4" aria-label={t("Enhanced image")}>
       {!source ? <div className="flex h-full min-h-64 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed p-8 text-center text-muted-foreground">
-        <ImageUpscale aria-hidden="true" size={28} strokeWidth={1.5} /><p className="font-medium text-foreground">{t("No image yet")}</p>
+        <BlurToSharp className="mb-2" /><p className="font-medium text-foreground">{t("No image yet")}</p>
         <p className="max-w-sm text-sm">{t("Add an AI-generated or low-resolution image on the left, then enhance it. You’ll compare the before and after here.")}</p>
         {error && <p className="mt-2 max-w-sm text-sm text-destructive">{error}</p>}
       </div> : <div className="flex flex-col gap-6">
