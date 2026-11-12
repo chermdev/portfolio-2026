@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+
+/* Checkerboard shows transparency behind an image. */
+@utility checkerboard { background: repeating-conic-gradient(var(--muted) 0 25%, transparent 0 50%) 0 0 / 16px 16px; }
 @source "../../../apps";
 @source "./";
 @source "../../site/src";
@@ -247,7 +250,7 @@
   /* Media tools: a drop target for files, and a stage that shows a frame with a crop box over it.
      The crop box is positioned in percentages of the frame, so it follows the canvas at any size. */
   .dropzone { @apply flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-background p-5 text-center text-sm text-muted-foreground transition-colors duration-150 hover:border-foreground/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring data-[active=true]:border-foreground data-[active=true]:bg-secondary; }
-  .crop-stage { @apply relative mx-auto w-fit max-w-full overflow-hidden rounded-xl; /* Checkerboard shows transparency. */ background: repeating-conic-gradient(var(--muted) 0 25%, transparent 0 50%) 0 0 / 16px 16px; }
+  .crop-stage { @apply checkerboard relative mx-auto w-fit max-w-full overflow-hidden rounded-xl; }
   .crop-stage canvas, .crop-stage img, .crop-stage video { @apply block h-auto max-w-full; max-height: min(60vh, 40rem); }
   .crop-box { @apply absolute cursor-move touch-none outline-none; box-shadow: 0 0 0 2px white, 0 0 0 100vmax rgb(0 0 0 / 55%); }
   .crop-box:focus-visible { box-shadow: 0 0 0 4px var(--ring), 0 0 0 100vmax rgb(0 0 0 / 55%); }
