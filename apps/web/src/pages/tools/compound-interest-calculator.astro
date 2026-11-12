@@ -3,7 +3,7 @@ import { localeFromPath } from '@portfolio/i18n';
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import SavingsCalculator from '../../components/calculators/SavingsCalculator';
 ---
-<ToolLayout title="Compound interest calculator" description="Simulate your savings. See how an initial deposit and monthly contributions could grow with compound interest." category="Savings" image="savings" app>
+<ToolLayout title="Compound interest calculator" seoTitle="Compound interest calculator with monthly contributions" description="Simulate your savings. See how an initial deposit and monthly contributions could grow with compound interest." category="Savings" image="savings" app>
   <SavingsCalculator locale={localeFromPath(Astro.url.pathname)} client:load />
   <div slot="guide" class="flex flex-col gap-8">
     <div class="prose-copy"><h2>How does compound interest work?</h2><p>Interest is added to your balance, and the next period earns interest on that larger balance. Over long periods, the interest earned can exceed what you contributed. Time and consistency usually matter more than the exact rate.</p></div>

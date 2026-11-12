@@ -7,7 +7,7 @@ import ResicoCalculator from '../../components/calculators/ResicoCalculator';
 const locale = localeFromPath(Astro.url.pathname);
 const amount = (value: number) => new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { minimumFractionDigits: 2 }).format(value);
 ---
-<ToolLayout title="RESICO calculator" description="Calculate your monthly RESICO ISR payment in Mexico, including the 1.25% withheld by companies." category="Taxes" image="resico" checked="Rates checked November 11, 2026" app>
+<ToolLayout title="RESICO calculator" seoTitle="RESICO calculator 2026: monthly ISR in Mexico" description="Calculate your monthly RESICO ISR payment in Mexico, including the 1.25% withheld by companies." category="Taxes" image="resico" checked="Rates checked November 11, 2026" app>
   <ResicoCalculator locale={locale} client:load />
   <div slot="guide" class="flex flex-col gap-8">
     <div class="prose-copy"><h2>How is the RESICO payment calculated?</h2><p>In the Simplified Trust Regime (RESICO) for individuals, you pay ISR each month on the income you actually collected, with no deductions. The rate depends on how much you collected that month and applies to all of it, not only to the part above a limit. What companies withheld is then subtracted.</p></div>

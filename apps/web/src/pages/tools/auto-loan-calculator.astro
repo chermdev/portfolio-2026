@@ -3,7 +3,7 @@ import { localeFromPath } from '@portfolio/i18n';
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import LoanCalculator from '../../components/calculators/LoanCalculator';
 ---
-<ToolLayout title="Auto loan calculator" description="Plan your next car with a little more clarity. Calculate a monthly payment or work backwards from the budget you have." category="Auto finance" image="auto" app>
+<ToolLayout title="Auto loan calculator" seoTitle="Auto loan calculator: monthly payment and budget" description="Plan your next car with a little more clarity. Calculate a monthly payment or work backwards from the budget you have." category="Auto finance" image="auto" app>
   <LoanCalculator locale={localeFromPath(Astro.url.pathname)} kind="auto" client:load />
   <div slot="guide" class="flex flex-col gap-8">
     <div class="prose-copy"><h2>What will my monthly payment be?</h2><p>Enter the vehicle price, your down payment (enganche), any trade-in equity, the term, and your annual interest rate. The calculator finances the amount left after your down payment and trade-in.</p></div>

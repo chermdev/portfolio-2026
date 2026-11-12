@@ -3,7 +3,7 @@ import { localeFromPath } from '@portfolio/i18n';
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import LoanCalculator from '../../components/calculators/LoanCalculator';
 ---
-<ToolLayout title="Mortgage calculator" description="Put a possible home into perspective. Explore monthly payments, purchasing power, and the difference your down payment makes." category="Home finance" image="mortgage" app>
+<ToolLayout title="Mortgage calculator" seoTitle="Mortgage calculator: monthly payment and affordability" description="Put a possible home into perspective. Explore monthly payments, purchasing power, and the difference your down payment makes." category="Home finance" image="mortgage" app>
   <LoanCalculator locale={localeFromPath(Astro.url.pathname)} kind="home" client:load />
   <div slot="guide" class="flex flex-col gap-8">
     <div class="prose-copy"><h2>Start with a price—or a budget.</h2><p>Monthly payment mode begins with a home price. Purchasing power begins with what you can pay each month. Both use your chosen interest rate, term, and down payment to estimate a fixed-rate mortgage.</p></div>

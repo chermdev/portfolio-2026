@@ -3,7 +3,7 @@ import { localeFromPath } from '@portfolio/i18n';
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import ImageUpscaler from '../../components/media/ImageUpscaler';
 ---
-<ToolLayout title="Image upscaler" description="Sharpen and enlarge AI-generated or low-resolution images with AI that runs on your own GPU. Images never leave your device." category="Media" image="upscale" kind="MultimediaApplication" app>
+<ToolLayout title="Image upscaler" seoTitle="Free AI image upscaler that runs in your browser" description="Sharpen and enlarge AI-generated or low-resolution images with AI that runs on your own GPU. Images never leave your device." category="Media" image="upscale" kind="MultimediaApplication" app>
   <ImageUpscaler locale={localeFromPath(Astro.url.pathname)} client:load />
   <div slot="guide" class="flex flex-col gap-8">
     <div class="prose-copy"><h2>Sharper images, without uploading them.</h2><p>Add an image and choose how to enhance it. An AI model (Real-ESRGAN) runs in your browser on your device’s GPU, or on the processor when the browser can’t use the GPU. The model downloads once and is then reused. Nothing is sent to a server.</p></div>

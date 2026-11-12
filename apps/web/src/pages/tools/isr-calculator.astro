@@ -7,7 +7,7 @@ import IsrCalculator from '../../components/calculators/IsrCalculator';
 const locale = localeFromPath(Astro.url.pathname);
 const amount = (value: number) => new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { minimumFractionDigits: 2 }).format(value);
 ---
-<ToolLayout title="ISR salary calculator" description="Calculate your take-home pay in Mexico after ISR and IMSS, with the 2026 tariff, the employment subsidy, and what your employer pays on top." category="Taxes" image="isr" checked="Rates checked November 11, 2026" app>
+<ToolLayout title="ISR salary calculator" seoTitle="ISR calculator 2026: net salary in Mexico after IMSS" description="Calculate your take-home pay in Mexico after ISR and IMSS, with the 2026 tariff, the employment subsidy, and what your employer pays on top." category="Taxes" image="isr" checked="Rates checked November 11, 2026" app>
   <IsrCalculator locale={locale} client:load />
   <div slot="guide" class="flex flex-col gap-8">
     <div class="prose-copy"><h2>How much ISR comes out of your pay?</h2><p>Enter your gross monthly salary. The calculator finds your row in the monthly tariff of Article 96 of the ISR law, applies its rate to the amount above the lower limit, adds the fixed fee, and then subtracts the employment subsidy if your income qualifies.</p></div>

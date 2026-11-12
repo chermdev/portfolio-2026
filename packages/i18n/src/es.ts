@@ -864,4 +864,14 @@ export const es: Record<string, string> = {
   "Each one is compressed as soon as it loads, and you can rotate or crop it here.": "Cada una se comprime en cuanto carga, y aquí puedes rotarla o recortarla.",
   "Use an AI-generated or low-resolution image. You’ll compare the before and after here.": "Usa una imagen hecha con IA o de baja resolución. Aquí compararás el antes y el después.",
   "Trim, crop, rotate and compress it here.": "Aquí lo recortas, rotas y comprimes.",
+  // Search-result titles of the tools (seoTitle), written for how people search in Spanish.
+  "Stripe fee calculator for Mexico, MXN and USD": "Calculadora de comisiones de Stripe en México",
+  "Auto loan calculator: monthly payment and budget": "Simulador de crédito automotriz y mensualidad",
+  "Mortgage calculator: monthly payment and affordability": "Simulador de crédito hipotecario y mensualidad",
+  "Compound interest calculator with monthly contributions": "Calculadora de interés compuesto con aportaciones",
+  "ISR calculator 2026: net salary in Mexico after IMSS": "Calculadora de ISR 2026: sueldo neto e IMSS",
+  "RESICO calculator 2026: monthly ISR in Mexico": "Calculadora RESICO 2026: ISR mensual a pagar",
+  "Free image compressor: JPEG, PNG, WebP, and AVIF": "Comprimir imágenes gratis: JPG, PNG, WebP y AVIF",
+  "Free AI image upscaler that runs in your browser": "Mejorar resolución de imágenes con IA, gratis",
+  "Free video compressor online, no uploads": "Comprimir video gratis en línea, sin subir archivos",
 };

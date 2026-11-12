@@ -9,6 +9,6 @@ import tailwindcss from '@tailwindcss/vite';
 // https://astro.build/config
 export default defineConfig({
   site: process.env.PUBLIC_SITE_URL || 'https://portfolio.example',
-  integrations: [react(), sitemap({ filter: (page) => !page.includes('/system-design') })],
+  integrations: [react(), sitemap({ filter: (page) => !/\/(system-design|404)\b/.test(page) })],
   vite: { cacheDir: process.env.npm_lifecycle_event === 'build' ? 'node_modules/.vite-build' : 'node_modules/.vite-dev', plugins: [tailwindcss()], optimizeDeps: { exclude: ['@ffmpeg/ffmpeg', 'onnxruntime-web'] }, worker: { format: 'es' }, ssr: { noExternal: ['@portfolio/i18n', '@portfolio/site', '@portfolio/ui', '@fontsource-variable/manrope'] } },
 });

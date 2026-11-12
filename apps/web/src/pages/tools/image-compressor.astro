@@ -3,7 +3,7 @@ import { localeFromPath } from '@portfolio/i18n';
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import ImageCompressor from '../../components/media/ImageCompressor';
 ---
-<ToolLayout title="Image compressor" description="Compress, convert, crop, rotate, and resize images in your browser. Files never leave your device." category="Media" image="image" kind="MultimediaApplication" app>
+<ToolLayout title="Image compressor" seoTitle="Free image compressor: JPEG, PNG, WebP, and AVIF" description="Compress, convert, crop, rotate, and resize images in your browser. Files never leave your device." category="Media" image="image" kind="MultimediaApplication" app>
   <ImageCompressor locale={localeFromPath(Astro.url.pathname)} client:load />
   <div slot="guide" class="flex flex-col gap-8">
     <div class="prose-copy"><h2>Smaller images, without uploading them.</h2><p>Add one or more images. Each one is rotated, cropped, resized, and re-encoded by your browser’s own image encoder as soon as it loads. Change a setting and every image updates. Nothing is sent to a server.</p></div>

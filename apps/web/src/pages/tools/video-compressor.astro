@@ -3,7 +3,7 @@ import { localeFromPath } from '@portfolio/i18n';
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import VideoCompressor from '../../components/media/VideoCompressor';
 ---
-<ToolLayout title="Video compressor" description="Trim, crop, rotate, resize, and compress video in your browser. Files never leave your device." category="Media" image="video" kind="MultimediaApplication" app>
+<ToolLayout title="Video compressor" seoTitle="Free video compressor online, no uploads" description="Trim, crop, rotate, resize, and compress video in your browser. Files never leave your device." category="Media" image="video" kind="MultimediaApplication" app>
   <VideoCompressor locale={localeFromPath(Astro.url.pathname)} client:load />
   <div slot="guide" class="flex flex-col gap-8">
     <div class="prose-copy"><h2>Compress video on your own device.</h2><p>Add a video, trim it with the handles under the preview, rotate or crop it if you need to, pick a format and compression level, and select Compress video. The file is read and encoded by your browser; nothing is uploaded.</p></div>
