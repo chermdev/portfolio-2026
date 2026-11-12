@@ -173,10 +173,14 @@
   a.tool-widget:hover { border-color: color-mix(in oklab, var(--foreground) 25%, transparent); }
   .app-icon { @apply flex size-11 shrink-0 items-center justify-center rounded-[0.85rem] text-white; background: var(--app); }
   .tool-widget.border-dashed .app-icon { @apply border border-dashed bg-transparent text-muted-foreground; }
-  /* Value-free illustration of what a money tool splits: a donut or bars beside a legend. */
+  /* Value-free illustration of what a money tool works out, beside a legend. Width follows each graphic's viewBox. */
   .share-chart { @apply flex items-center gap-4; }
-  .share-graphic { @apply size-20 shrink-0; }
+  .share-graphic { @apply h-20 w-auto max-w-40 shrink-0; }
   .share-legend { @apply flex flex-col gap-1.5 text-sm text-muted-foreground; }
+  /* Iceberg: a whole split into what floats (seen) and what sinks (hidden), beside a grouped legend with amounts. */
+  .iceberg { @apply grid items-center gap-6 @xl:grid-cols-[13rem_minmax(0,1fr)]; }
+  .iceberg-graphic { @apply mx-auto w-full max-w-52; }
+  .iceberg-legend { @apply flex flex-col gap-5; }
   .tool-widget-value { margin-top: 0.25rem; font-size: 1.75rem; line-height: 1.15; letter-spacing: -0.04em; font-weight: 500; font-variant-numeric: tabular-nums; }
   .result-panel { @apply rounded-2xl bg-secondary p-7 flex flex-col gap-6; container-type: inline-size; }
   .result-value { /* Sized by the panel, not the viewport, so long amounts stay on one line. */ font-size: clamp(1.75rem, 11cqi, 3.8rem); line-height: 1.1; letter-spacing: -0.06em; font-weight: 500; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }

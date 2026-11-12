@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stripeFees, grossForNet, monthlyPayment, purchasingPrincipal, loanScenario, amortization, stripePresets, savingsGrowth, salaryIsr, employmentSubsidy2026, isrMonthly2026, resicoTax, roundMoney } from './index.ts';
+import { stripeFees, grossForNet, monthlyPayment, purchasingPrincipal, loanScenario, amortization, stripePresets, savingsGrowth, salaryIsr, employmentSubsidy2026, isrMonthly2026, resicoTax, roundMoney, payrollContributions, socialSecurity2026 } from './index.ts';
 test('Mexico processing fee with 16% fee tax', () => {
   assert.deepEqual(stripeFees(1000, { percent: 3.6, fixed: 3, radar: 0, international: 0, conversion: 0, tax: 16, extra: 0 }),
     { gross: 1000, processing: 39, radar: 0, extra: 0, tax: 6.24, fee: 45.24, net: 954.76 });
@@ -176,4 +176,29 @@ test('RESICO applies the band rate to the whole month', () => {
   // Sub-cent input is rounded before the band is chosen, so 83,333.334 stays at 1.5%.
   assert.equal(resicoTax(83333.334, 0, 1.25).rate, 1.5);
   assert.equal(salaryIsr(844.594, employmentSubsidy2026).rate, 1.92);
+});
+
+test('payroll contributions follow the 2026 IMSS, SAR and INFONAVIT rates', () => {
+  // 10,000 a month: 333.33 a day (÷ 30), SBC 349.77 (below 3 UMA, so no medical excess), employer old-age band 2.51–3.00 UMA (6.026%).
+  const mid = payrollContributions(10000, socialSecurity2026), base = (10000 / 30) * 1.0493 * 30.4;
+  assert.equal(mid.sbc, 349.77);
+  assert.equal(mid.oldAgeRate, 6.026);
+  assert.equal(mid.employee, roundMoney(base * 0.02375));
+  assert.equal(mid.employer.imss, roundMoney(117.31 * 30.4 * 0.204 + base * 0.0504355));
+  assert.equal(mid.employer.retirement, roundMoney(base * 0.08026));
+  assert.equal(mid.employer.infonavit, roundMoney(base * 0.05));
+  assert.equal(mid.employer.total, roundMoney(mid.employer.imss + mid.employer.retirement + mid.employer.infonavit));
+  // Minimum wage: the employer pays the employee's share too (Art. 36 LSS).
+  const minimum = payrollContributions(315.04 * 30, socialSecurity2026);
+  assert.equal(minimum.paysEmployeeShare, true);
+  assert.equal(minimum.employee, 0);
+  assert.equal(payrollContributions(315.04 * 30 + 1, socialSecurity2026).paysEmployeeShare, false);
+  // Above 25 UMA the SBC stops growing, and above 4 UMA the top old-age rate applies.
+  const high = payrollContributions(200000, socialSecurity2026);
+  assert.equal(high.sbc, 2932.75);
+  assert.equal(high.oldAgeRate, 7.513);
+  const excess = (2932.75 - 3 * 117.31) * 30.4;
+  assert.equal(high.employee, roundMoney(excess * 0.004 + 2932.75 * 30.4 * 0.02375));
+  assert.deepEqual(payrollContributions(200000, socialSecurity2026), payrollContributions(400000, socialSecurity2026));
+  assert.equal(payrollContributions(0, socialSecurity2026).employer.total, 0);
 });

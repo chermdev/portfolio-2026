@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { useEffect } from 'react';
-import { stripePresets, employmentSubsidy2026, type Currency, type RadarPlan, type FeeConfig } from '@portfolio/calculators';
+import { stripePresets, employmentSubsidy2026, socialSecurity2026, type Currency, type RadarPlan, type FeeConfig } from '@portfolio/calculators';
 export type Draft = Record<keyof FeeConfig, string>;
 export function feeDefaults(currency: Currency, plan: RadarPlan): Draft {
   const p = stripePresets[currency];
@@ -10,7 +10,7 @@ export function feeDefaults(currency: Currency, plan: RadarPlan): Draft {
 export const stripeDefaults = () => ({ currency: 'MXN' as Currency, plan: 'lite' as RadarPlan, draft: feeDefaults('MXN', 'lite'), international: false, conversion: false, mode: 'charge', amount: '1000' });
 export const loanDefaults = (home: boolean) => ({ mode: 'payment' as 'payment' | 'power', price: home ? '2500000' : '450000', budget: home ? '20000' : '8000', currency: 'MXN', down: '20', downType: 'percent' as 'percent' | 'cash', tradeIn: '0', rate: home ? '10.5' : '12', months: home ? '240' : '60', showSchedule: false, deposits: [] as { id: number; month: string; amount: string }[], strategy: 'term' as 'term' | 'payment' });
 export const savingsDefaults = () => ({ currency: 'MXN', initial: '10000', monthly: '2000', rate: '10', years: '10', compounding: '12' as '1' | '12' | '365', showTable: false });
-export const isrDefaults = () => ({ salary: '20000', subsidy: String(employmentSubsidy2026.amount), cap: String(employmentSubsidy2026.cap) });
+export const isrDefaults = () => ({ salary: '20000', subsidy: String(employmentSubsidy2026.amount), cap: String(employmentSubsidy2026.cap), uma: String(socialSecurity2026.uma), minimumWage: String(socialSecurity2026.minimumWage), integration: String(socialSecurity2026.integration), riskPremium: String(socialSecurity2026.riskPremium) });
 export const resicoDefaults = () => ({ income: '40000', companies: '0', retention: '1.25' });
 export const imageDefaults = () => ({ imageFormat: 'image/webp', imageQuality: '80', imageMaxSide: '0' });
 export const videoDefaults = () => ({ videoFormat: 'mp4', videoQuality: 'medium', videoMaxSide: '0', mute: false });
@@ -35,6 +35,8 @@ function calculatorStore<T extends object>(name: string, defaults: () => T) {
       const base = defaults();
       // Discard malformed shapes rather than letting storage break a calculator.
       for (const key of Object.keys(base) as (keyof T)[]) {
+        // Inputs added after a draft was saved fall back to their defaults.
+        if (!(key in saved)) continue;
         const value = (saved as T)[key];
         if (typeof value !== typeof base[key] || Array.isArray(value) !== Array.isArray(base[key])) return current;
         if (typeof base[key] === 'object' && value === null) return current;
@@ -47,7 +49,7 @@ function calculatorStore<T extends object>(name: string, defaults: () => T) {
       for (const [key, allowed] of Object.entries(choices)) if (key in base && !allowed.includes(String(selections[key]))) return current;
       const deposits = (saved as { deposits?: unknown[] }).deposits;
       if (deposits?.some(item => !item || typeof item !== 'object' || typeof (item as {id?:unknown}).id !== 'number' || typeof (item as {month?:unknown}).month !== 'string' || typeof (item as {amount?:unknown}).amount !== 'string')) return current;
-      return { ...current, values: Object.fromEntries(Object.keys(base).map(key => [key, (saved as Record<string, unknown>)[key]])) as T };
+      return { ...current, values: Object.fromEntries(Object.keys(base).map(key => [key, key in saved ? (saved as Record<string, unknown>)[key] : base[key as keyof T]])) as T };
     },
   }));
 }

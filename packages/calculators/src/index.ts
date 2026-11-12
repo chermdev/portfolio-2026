@@ -191,3 +191,41 @@ export function resicoTax(amount: number, paid: number, retention: number) {
     headroom: band < resicoMonthly.length - 1 ? roundMoney(resicoMonthly[band][0] - income) : null,
   };
 }
+/**
+ * Social security on a salary, 2026 (Ley del Seguro Social, Ley del INFONAVIT; rates checked against
+ * two published 2026 IMSS tables). UMA 117.31 (INEGI, from 1 Feb 2026); general minimum wage 315.04 (DOF 9 Dec 2025).
+ * `integration` turns the daily salary into the SBC: 1.0493 = (365 + 15 days of aguinaldo + 25% of 12 vacation days) / 365, the first-year legal minimum.
+ */
+export const socialSecurity2026 = { uma: 117.31, minimumWage: 315.04, integration: 1.0493, riskPremium: 0.54355, days: 30.4 };
+/** Employer old-age contribution (cesantía y vejez) for 2026, by SBC: up to 1 minimum wage, then [SBC in UMAs up to, rate %]. */
+export const oldAgeEmployer2026 = { minimumWageRate: 3.15, bands: [[1.5, 3.676], [2, 4.851], [2.5, 5.556], [3, 6.026], [3.5, 6.361], [4, 6.613], [Infinity, 7.513]] as const };
+export function payrollContributions(amount: number, options: { uma: number; minimumWage: number; integration: number; riskPremium: number; days: number }) {
+  finiteRange(amount, 0, 1e9, 'Income');
+  finiteRange(options.uma, 1, 1e4, 'UMA');
+  finiteRange(options.minimumWage, 1, 1e4, 'Minimum wage');
+  finiteRange(options.integration, 1, 2, 'Integration factor');
+  finiteRange(options.riskPremium, 0, 15, 'Work risk premium');
+  const { uma, minimumWage, integration, riskPremium, days } = options;
+  if (amount <= 0) return { sbc: 0, oldAgeRate: 0, paysEmployeeShare: false, employee: 0, employer: { imss: 0, retirement: 0, infonavit: 0, total: 0 } };
+  // A monthly salary becomes daily pay over 30 days (LFT Art. 89); contributions accrue over the average 30.4-day month.
+  const daily = amount / 30;
+  // The SBC never drops below the minimum wage and is capped at 25 UMA (Art. 28 LSS).
+  const sbc = Math.min(Math.max(daily * integration, minimumWage), 25 * uma);
+  const base = sbc * days, excess = Math.max(0, sbc - 3 * uma) * days;
+  const share = (rate: number, on = base) => on * rate / 100;
+  // Employee: medical excess, cash benefits, pensioners' medical care, disability and life, old age.
+  const employee = share(0.4, excess) + share(0.25) + share(0.375) + share(0.625) + share(1.125);
+  const oldAge = sbc <= minimumWage ? oldAgeEmployer2026.minimumWageRate : oldAgeEmployer2026.bands.find(([max]) => sbc / uma <= max)![1];
+  const imss = share(20.4, uma * days) + share(1.1, excess) + share(0.7) + share(1.05) + share(1.75) + share(riskPremium) + share(1);
+  const retirement = share(2) + share(oldAge);
+  const infonavit = share(5);
+  // Art. 36 LSS: for a minimum-wage worker the employer also pays the employee's share.
+  const paysEmployeeShare = daily <= minimumWage;
+  // Round each part first so the total equals the parts shown.
+  const employer = { imss: roundMoney(imss + (paysEmployeeShare ? employee : 0)), retirement: roundMoney(retirement), infonavit: roundMoney(infonavit) };
+  return {
+    sbc: roundMoney(sbc), oldAgeRate: oldAge, paysEmployeeShare,
+    employee: paysEmployeeShare ? 0 : roundMoney(employee),
+    employer: { ...employer, total: roundMoney(employer.imss + employer.retirement + employer.infonavit) },
+  };
+}
