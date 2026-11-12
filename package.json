@@ -12,7 +12,7 @@
     "dev": "pnpm --filter @portfolio/web dev",
     "build": "pnpm -r build",
     "check": "pnpm -r check",
-    "test": "node --experimental-strip-types --test packages/calculators/src/*.test.ts packages/i18n/src/*.test.ts apps/web/src/components/media/*.test.ts",
+    "test": "node --experimental-strip-types --test packages/calculators/src/*.test.ts packages/i18n/src/*.test.ts apps/web/src/components/media/*.test.ts packages/ui/src/lib/*.test.ts",
     "preview": "pnpm --filter @portfolio/web preview",
     "og": "pnpm --filter @portfolio/web og",
     "verify:build": "node scripts/verify-build.mjs"

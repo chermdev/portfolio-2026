@@ -36,6 +36,7 @@ All content aligns to `.page-shell`. Section spacing uses `.section`, `py-sectio
 ## Components
 
 - Compose shadcn components before building a new control. Prefer variants over class overrides; `className` should mainly place a component in the layout.
+- Number inputs use `NumberInput` (or `useNumberInput` for a custom-styled `<input>`) from `@portfolio/ui/components/number-input`: it shows thousands separators while the stored value stays a plain numeric string. Do not use `type="number"`.
 - Forms use FieldGroup, Field, FieldLabel, FieldDescription, and FieldError. Labels must be associated with their controls. Show invalid input beside the field and suppress invalid results.
 - Small option sets use ToggleGroup. Select items belong inside SelectGroup. Dialog, Sheet, and Drawer require an accessible title.
 - Use semantic tokens such as `bg-background`, `text-muted-foreground`, and `border-input`. Colors come from tokens, including errors, charts, and focus.

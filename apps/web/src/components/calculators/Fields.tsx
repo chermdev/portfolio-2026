@@ -2,7 +2,8 @@ import { useTranslation } from '@portfolio/i18n/react';
 import { type Locale } from '@portfolio/i18n';
 import { useEffect, useId, useState, type ReactNode, type RefObject } from 'react';
 import { ChevronDown, SlidersHorizontal } from 'lucide-react';
-import { Input } from '@portfolio/ui/components/input';
+import { NumberInput, useNumberInput } from '@portfolio/ui/components/number-input';
+import { groupNumber } from '@portfolio/ui/lib/number';
 import { Button } from '@portfolio/ui/components/button';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@portfolio/ui/components/collapsible';
 import { Field, FieldLabel, FieldDescription, FieldError } from '@portfolio/ui/components/field';
@@ -11,7 +12,7 @@ export function NumberField({ label, value, onChange, suffix, hint, min = 0, max
   const id = useId();
   const { t } = useTranslation();
   const invalid = value === '' || !Number.isFinite(Number(value)) || Number(value) < min || Number(value) > max || (step >= 1 && Math.abs((Number(value) - min) / step - Math.round((Number(value) - min) / step)) > 1e-6);
-  return <Field data-invalid={invalid || undefined}><FieldLabel htmlFor={id}>{label}{suffix && <span className="ml-auto text-xs text-muted-foreground">{suffix}</span>}</FieldLabel><Input id={id} type="number" inputMode="decimal" min={min} max={max} step={step} value={value} onChange={event => onChange(event.target.value)} aria-invalid={invalid} aria-describedby={invalid ? `${id}-error` : hint ? `${id}-hint` : undefined} />{hint && <FieldDescription id={`${id}-hint`}>{hint}</FieldDescription>}{invalid && <FieldError id={`${id}-error`}>{t('Enter a number from {min} to {max}{step}.', { min, max, step: step >= 1 ? ' ' + t('in steps of {step}', { step }) : '' })}</FieldError>}</Field>;
+  return <Field data-invalid={invalid || undefined}><FieldLabel htmlFor={id}>{label}{suffix && <span className="ml-auto text-xs text-muted-foreground">{suffix}</span>}</FieldLabel><NumberInput id={id} value={value} onValueChange={onChange} aria-invalid={invalid} aria-describedby={invalid ? `${id}-error` : hint ? `${id}-hint` : undefined} />{hint && <FieldDescription id={`${id}-hint`}>{hint}</FieldDescription>}{invalid && <FieldError id={`${id}-error`}>{t('Enter a number from {min} to {max}{step}.', { min: groupNumber(String(min)), max: groupNumber(String(max)), step: step >= 1 ? ' ' + t('in steps of {step}', { step }) : '' })}</FieldError>}</Field>;
 }
 export function SelectField({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: { value: string; label: string }[] }) {
   const id = useId();
@@ -26,11 +27,12 @@ export function AmountField({ label, value, onChange, currency, quick = [], hint
   const id = useId();
   const { t, locale } = useTranslation();
   const invalid = isAmountInvalid(value);
+  const number = useNumberInput(value, onChange);
   return <Field data-invalid={invalid || undefined}><FieldLabel htmlFor={id}>{label}</FieldLabel>
-    <div className="amount-field"><input id={id} className="amount-input" type="number" inputMode="decimal" min={0} max={1e9} step={0.01} value={value} onChange={event => onChange(event.target.value)} aria-invalid={invalid} aria-describedby={invalid ? `${id}-error` : hint ? `${id}-hint` : undefined} /><span className="meta">{currency}</span></div>
+    <div className="amount-field"><input id={id} className="amount-input" {...number} aria-invalid={invalid} aria-describedby={invalid ? `${id}-error` : hint ? `${id}-hint` : undefined} /><span className="meta">{currency}</span></div>
     {quick.length > 0 && <div className="flex flex-wrap gap-2" role="group" aria-label={t("Quick amounts")}>{quick.map(amount => <Button key={amount} type="button" size="sm" variant={Number(value) === amount ? 'secondary' : 'outline'} className="h-11 rounded-full sm:h-8" aria-pressed={Number(value) === amount} onClick={() => onChange(String(amount))}>{new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount)}</Button>)}</div>}
     {hint && <FieldDescription id={`${id}-hint`}>{hint}</FieldDescription>}
-    {invalid && <FieldError id={`${id}-error`}>{t('Enter a number from {min} to {max}{step}.', { min: 0, max: 1e9, step: '' })}</FieldError>}</Field>;
+    {invalid && <FieldError id={`${id}-error`}>{t('Enter a number from {min} to {max}{step}.', { min: 0, max: groupNumber(String(1e9)), step: '' })}</FieldError>}</Field>;
 }
 /** Secondary settings, closed by default; the summary keeps the current values visible. */
 export function Settings({ title, summary, edited, children }: { title: string; summary: string; edited?: boolean; children: ReactNode }) {
