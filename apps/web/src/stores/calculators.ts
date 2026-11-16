@@ -20,6 +20,9 @@ export const isrDefaults = () => ({ salary: '20000', subsidy: String(employmentS
 export const resicoDefaults = () => ({ income: '40000', companies: '0', retention: '1.25' });
 export const imageDefaults = () => ({ imageFormat: 'image/webp', imageQuality: '80', imageMaxSide: '0' });
 export const videoDefaults = () => ({ videoFormat: 'mp4', videoQuality: 'medium', videoMaxSide: '0', mute: false });
+// Secret Santa keeps the organizer's draft and, per group, the access tokens this browser holds (the draw itself lives on the server).
+export type SantaRoom = { group: string; title: string; admin: string; token: string };
+export const santaDefaults = () => ({ names: '', group: '', budget: '', date: '', message: '', exclusions: [] as { id: number; a: string; b: string }[], rooms: [] as SantaRoom[] });
 export const upscaleDefaults = () => ({ upscaleModel: 'fast' as 'fast' | 'quality', upscaleScale: '2' as '1' | '2' | '4' });
 type Update<T> = T | ((previous: T) => T);
 // Persist inputs only. Derived results are recomputed; each tool has its own key.
@@ -55,6 +58,9 @@ function calculatorStore<T extends object>(name: string, defaults: () => T) {
       for (const [key, allowed] of Object.entries(choices)) if (key in base && key in selections && !allowed.includes(String(selections[key]))) return current;
       const deposits = (saved as { deposits?: unknown[] }).deposits;
       if (deposits?.some(item => !item || typeof item !== 'object' || typeof (item as {id?:unknown}).id !== 'number' || typeof (item as {month?:unknown}).month !== 'string' || typeof (item as {amount?:unknown}).amount !== 'string')) return current;
+      const lists = saved as { exclusions?: unknown[]; rooms?: unknown[] };
+      if (lists.exclusions?.some(item => !item || typeof item !== 'object' || typeof (item as {id?:unknown}).id !== 'number' || typeof (item as {a?:unknown}).a !== 'string' || typeof (item as {b?:unknown}).b !== 'string')) return current;
+      if (lists.rooms?.some(item => !item || typeof item !== 'object' || ['group', 'title', 'admin', 'token'].some(field => typeof (item as Record<string, unknown>)[field] !== 'string'))) return current;
       return { ...current, values: Object.fromEntries(Object.keys(base).map(key => [key, key in saved ? (saved as Record<string, unknown>)[key] : base[key as keyof T]])) as T };
     },
   }));
@@ -69,6 +75,7 @@ export const useIsrStore = calculatorStore('chermdev:calculator:isr:v1', isrDefa
 export const useResicoStore = calculatorStore('chermdev:calculator:resico:v1', resicoDefaults);
 export const useImageStore = calculatorStore('chermdev:tool:image:v1', imageDefaults);
 export const useVideoStore = calculatorStore('chermdev:tool:video:v1', videoDefaults);
+export const useSecretSantaStore = calculatorStore('chermdev:tool:secret-santa:v2', santaDefaults);
 export const useUpscaleStore = calculatorStore('chermdev:tool:upscale:v1', upscaleDefaults);
 export function useHydrateCalculator(store: { persist: { rehydrate: () => unknown } }) {
   useEffect(() => { void store.persist.rehydrate(); }, [store]);

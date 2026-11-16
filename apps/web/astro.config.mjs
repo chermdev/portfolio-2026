@@ -1,14 +1,18 @@
 import { existsSync } from 'node:fs';
-if (existsSync('.env')) process.loadEnvFile('.env');
+// Local secrets (e.g. DATABASE_URL pulled by `neon deploy`). Earlier files win; on Vercel these come from project settings.
+for (const file of ['.env.local', '.env']) if (existsSync(file)) process.loadEnvFile(file);
 // @ts-check
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
+import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
   site: process.env.PUBLIC_SITE_URL || 'https://portfolio.example',
+  // Pages stay prerendered; only routes that opt out (the Secret Santa API) run as Vercel functions.
+  adapter: vercel(),
   integrations: [react(), sitemap({ filter: (page) => !/\/(system-design|404)\b/.test(page) })],
   vite: { cacheDir: process.env.npm_lifecycle_event === 'build' ? 'node_modules/.vite-build' : 'node_modules/.vite-dev', plugins: [tailwindcss()], optimizeDeps: { exclude: ['@ffmpeg/ffmpeg', 'onnxruntime-web'] }, worker: { format: 'es' }, ssr: { noExternal: ['@portfolio/i18n', '@portfolio/site', '@portfolio/ui', '@fontsource-variable/manrope'] } },
 });

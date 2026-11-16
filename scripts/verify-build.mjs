@@ -2,10 +2,10 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 const root = process.cwd();
 let count=0;
-async function walk(dir){for(const item of await readdir(dir,{withFileTypes:true})){const file=path.join(dir,item.name);if(item.isDirectory())await walk(file);else if(item.name.endsWith('.html'))await check(file);}}
-async function check(file){
+async function walk(dir,base=dir){for(const item of await readdir(dir,{withFileTypes:true})){const file=path.join(dir,item.name);if(item.isDirectory())await walk(file,base);else if(item.name.endsWith('.html'))await check(file,base);}}
+async function check(file,appDir){
  const html=await readFile(file,'utf8');
- const spanish=file.includes('/dist/es/');
+ const spanish=path.relative(appDir,file).startsWith('es/');
  if(!html.includes(`lang="${spanish?'es':'en'}"`))throw Error(`${file}: wrong document language`);
  for(const language of ['en','es'])if(!html.includes(`hreflang="${language}"`))throw Error(`${file}: missing language alternative`);
  const get=attribute=>html.match(new RegExp(`<meta[^>]+(?:name|property)="${attribute}"[^>]+content="([^"]+)"`))?.[1];
@@ -17,8 +17,7 @@ async function check(file){
  if(buffer.readUInt32BE(16)!==1200||buffer.readUInt32BE(20)!==630)throw Error('Wrong image dimensions');
  if((html.match(/<h1(?:\s|>)/g)||[]).length!==1)throw Error(`${file}: expected one h1`);
  if(!html.includes('rel="canonical"'))throw Error(`${file}: missing canonical`);
- if(file.includes('/tools/')&&!file.endsWith('/tools/index.html')&&!/"applicationCategory":"(Finance|Multimedia)Application"/.test(html))throw Error(`${file}: missing tool structured data`);
- const appDir=file.slice(0,file.indexOf('/dist/'))+'/dist';
+ if(file.includes('/tools/')&&!file.endsWith('/tools/index.html')&&!/"applicationCategory":"(Finance|Multimedia|Lifestyle)Application"/.test(html))throw Error(`${file}: missing tool structured data`);
  for(const match of html.matchAll(/(?:href|src)="(\/[^"#?]*)(?:[?#][^"]*)?"/g)){
   const value=match[1];if(value.startsWith('//')||value.startsWith('/_astro/'))continue;
   const target=path.join(appDir,value);
@@ -27,5 +26,6 @@ async function check(file){
  }
  count++;
 }
-for(const app of ['web','blog','learn','admin'])await walk(path.join(root,'apps',app,'dist'));
+// Apps with a server adapter (web, on Vercel) write their pages to dist/client.
+for(const app of ['web','blog','learn','admin']){const dist=path.join(root,'apps',app,'dist');await walk(await stat(path.join(dist,'client')).then(()=>path.join(dist,'client'),()=>dist));}
 console.log(`Verified ${count} HTML pages: metadata, canonical, headings, local links, 1200×630 OG assets, tool schema.`);

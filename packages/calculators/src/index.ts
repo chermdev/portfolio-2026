@@ -248,3 +248,4 @@ export function payrollContributions(amount: number, options: { uma: number; min
     employer: { ...employer, total: roundMoney(employer.imss + employer.retirement + employer.infonavit) },
   };
 }
+export * from './secret-santa.ts';

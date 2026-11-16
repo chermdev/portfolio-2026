@@ -1,11 +1,11 @@
 ---
-import { CarFront, House, PiggyBank, Image, ImageUpscale, Film, Landmark, BriefcaseBusiness } from 'lucide-react';
+import { CarFront, House, PiggyBank, Image, ImageUpscale, Film, Landmark, BriefcaseBusiness, Gift } from 'lucide-react';
 import { brands } from './brands';
 interface Props { icon: string; small?: boolean }
 const { icon, small = false } = Astro.props;
-const icons = { car: CarFront, home: House, savings: PiggyBank, isr: Landmark, resico: BriefcaseBusiness, image: Image, upscale: ImageUpscale, video: Film };
+const icons = { car: CarFront, home: House, savings: PiggyBank, isr: Landmark, resico: BriefcaseBusiness, image: Image, upscale: ImageUpscale, video: Film, gift: Gift };
 // Payment providers keep their brand color and mark; the rest take a --glow-* tint. Upcoming tools have no accent.
-const accents: Record<string, string> = { stripe: '#635bff', mercadopago: brands.mercadopago.color, clip: brands.clip.color, car: 'var(--glow-2)', home: 'var(--glow-3)', savings: 'var(--glow-1)', isr: 'var(--glow-3)', resico: 'var(--glow-2)', image: 'var(--glow-1)', upscale: 'var(--glow-2)', video: 'var(--glow-3)' };
+const accents: Record<string, string> = { stripe: '#635bff', mercadopago: brands.mercadopago.color, clip: brands.clip.color, car: 'var(--glow-2)', home: 'var(--glow-3)', savings: 'var(--glow-1)', isr: 'var(--glow-3)', resico: 'var(--glow-2)', image: 'var(--glow-1)', upscale: 'var(--glow-2)', video: 'var(--glow-3)', gift: 'var(--glow-1)' };
 const Icon = icons[icon as keyof typeof icons];
 ---
 <span class:list={["app-icon", small && "size-9 rounded-[0.7rem]"]} style={accents[icon] ? `--app: ${accents[icon]}` : undefined}>{icon === 'stripe'
