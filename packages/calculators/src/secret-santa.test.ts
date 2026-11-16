@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { drawNames, parseNames, duplicateNames, parseWishes } from './secret-santa.ts';
+import { drawNames, parseNames, duplicateNames, parseWishes, sameRoster } from './secret-santa.ts';
 const valid = (names: string[], receivers: string[] | null, pairs: [string, string][] = []) => {
   assert.ok(receivers);
   assert.deepEqual([...receivers].sort(), [...names].sort(), 'everyone receives exactly once');
@@ -38,4 +38,13 @@ test('parses names, duplicates and pasted wish lists', () => {
   assert.deepEqual(duplicateNames(['Ana', 'Luis', 'ana']), ['ana']);
   assert.deepEqual(parseWishes('- Audífonos\r\n* Libro de cocina\n• Taza\n1. Calcetines\n2) Bufanda\n[ ] Lego\n[x] Vela\n☐ Termo\n✓ Planta\n\n  Café de olla  \n-1 regalo'), ['Audífonos', 'Libro de cocina', 'Taza', 'Calcetines', 'Bufanda', 'Lego', 'Vela', 'Termo', 'Planta', 'Café de olla', '1 regalo']);
   assert.equal(parseWishes('x'.repeat(500))[0].length, 200);
+});
+
+test('an edit keeps the draw only when people and exclusions are unchanged', () => {
+  const people = ['Ana', 'Luis', 'Carlos'], pairs: [string, string][] = [['Ana', 'Luis']];
+  assert.equal(sameRoster(['carlos', 'ANA', 'Luis'], [['luis', 'ana'], ['Luis', 'Ana']], people, pairs), true);
+  assert.equal(sameRoster([...people, 'María'], pairs, people, pairs), false);
+  assert.equal(sameRoster(['Ana', 'Luis', 'Carla'], pairs, people, pairs), false);
+  assert.equal(sameRoster(people, [], people, pairs), false);
+  assert.equal(sameRoster(people, [['Ana', 'Carlos']], people, pairs), false);
 });

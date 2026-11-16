@@ -64,3 +64,13 @@ export function drawNames(names: string[], exclusions: [string, string][] = [], 
   };
   return search(0) ? receiverOf.map(index => names[index]) : null;
 }
+
+/** True when two rosters have the same people and exclusions, ignoring order and letter case, so an edit can keep the draw. */
+export function sameRoster(people: string[], exclusions: [string, string][], otherPeople: string[], otherExclusions: [string, string][]) {
+  const names = (list: string[]) => list.map(key).sort().join('\n');
+  const pairs = (list: [string, string][], known: string[]) => {
+    const set = new Set(known.map(key));
+    return [...new Set(list.filter(([a, b]) => set.has(key(a)) && set.has(key(b))).map(pair => pair.map(key).sort().join('\t')))].sort().join('\n');
+  };
+  return names(people) === names(otherPeople) && pairs(exclusions, people) === pairs(otherExclusions, otherPeople);
+}

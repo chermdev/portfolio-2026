@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import postgres from 'postgres';
 import { createHash, randomBytes } from 'node:crypto';
-import { drawNames, duplicateNames, santaLimits } from '@portfolio/calculators';
+import { drawNames, duplicateNames, sameRoster, santaLimits } from '@portfolio/calculators';
 
 // Secret Santa API. No accounts: access is by unguessable tokens kept in each person's browser.
 // - The group id lets anyone with the group link see the names and claim an unclaimed one.
@@ -51,19 +51,22 @@ function roster(body: Record<string, unknown>) {
   const known = new Set(people.map(name => name.toLocaleLowerCase()));
   const exclusions = body.exclusions.slice(0, 200).map(pair => { if (!Array.isArray(pair) || pair.length !== 2) throw new Problem('invalid'); return [text(pair[0], santaLimits.name), text(pair[1], santaLimits.name)] as [string, string]; })
     .filter(([a, b]) => known.has(a.toLocaleLowerCase()) && known.has(b.toLocaleLowerCase()));
+  return { people, exclusions };
+}
+function draw(people: string[], exclusions: [string, string][]) {
   const receivers = drawNames(people, exclusions);
   if (!receivers) throw new Problem('impossible');
-  return { people, exclusions, receivers };
+  return receivers;
 }
 // Groups are deleted 30 days after the exchange, or 30 days after the last draw when there is no date.
 // A past exchange date still gets 30 days from now, so the group isn't created already expired.
-const expiry = (date: string | null) => date ? new Date(Math.max(Date.parse(`${date}T00:00:00Z`), Date.now()) + 30 * 864e5) : new Date(Date.now() + 30 * 864e5);
+const expiry = (date: string | null, drawnAt = Date.now()) => date ? new Date(Math.max(Date.parse(`${date}T00:00:00Z`), Date.now()) + 30 * 864e5) : new Date(drawnAt + 30 * 864e5);
 const groupInfo = (g: Record<string, unknown>) => ({ name: g.name, budget: g.budget, date: g.exchange_date ?? '', message: g.message, drawnAt: g.drawn_at });
 
 async function handle(db: postgres.Sql, body: Record<string, unknown>) {
   const action = body.action;
   if (action === 'create') {
-    const info = details(body), { people, exclusions, receivers } = roster(body);
+    const info = details(body), { people, exclusions } = roster(body), receivers = draw(people, exclusions);
     const group = token(12), admin = token(24), ids = people.map(() => token(9));
     await db.begin(async tx => {
       await tx`delete from santa_groups where expires_at < now()`;
@@ -110,22 +113,29 @@ async function handle(db: postgres.Sql, body: Record<string, unknown>) {
     return { ok: true };
   }
   if (action === 'update') {
-    // Same names keep their claim and wish list; new names are added; missing names are removed. Then everyone is drawn again.
-    const info = details(body), { people, exclusions, receivers } = roster(body);
+    // Same names keep their claim and wish list; new names are added; missing names are removed.
+    // Everyone is drawn again only when the people or exclusions change; detail edits keep the draw.
+    const info = details(body), { people, exclusions } = roster(body);
+    let redrawn = false;
     await db.begin(async tx => {
-      // Lock the group so two redraws at once (a double click) can't interleave.
-      await tx`select 1 from santa_groups where id = ${g.id} for update`;
+      // Lock the group so two saves at once (a double click) can't interleave.
+      const [locked] = await tx`select exclusions, drawn_at from santa_groups where id = ${g.id} for update`;
       const existing = await tx`select id, name from santa_people where group_id = ${g.id}`;
       const byName = new Map(existing.map(row => [String(row.name).toLocaleLowerCase(), String(row.id)]));
       const ids = people.map(name => byName.get(name.toLocaleLowerCase()) ?? token(9));
-      await tx`delete from santa_people where group_id = ${g.id} and id not in ${tx(ids)}`;
-      for (const [i, name] of people.entries()) {
-        const row = { id: ids[i], group_id: g.id, name, position: i, receiver_id: ids[people.indexOf(receivers[i])] };
-        await tx`insert into santa_people ${tx(row)} on conflict (id) do update set name = excluded.name, position = excluded.position, receiver_id = excluded.receiver_id`;
-      }
-      await tx`update santa_groups set name = ${info.name}, budget = ${info.budget}, exchange_date = ${info.date}, message = ${info.message}, exclusions = ${tx.json(exclusions)}, drawn_at = now(), expires_at = ${expiry(info.date)} where id = ${g.id}`;
+      redrawn = !sameRoster(people, exclusions, existing.map(row => String(row.name)), locked.exclusions);
+      if (redrawn) {
+        const receivers = draw(people, exclusions);
+        await tx`delete from santa_people where group_id = ${g.id} and id not in ${tx(ids)}`;
+        for (const [i, name] of people.entries()) {
+          const row = { id: ids[i], group_id: g.id, name, position: i, receiver_id: ids[people.indexOf(receivers[i])] };
+          await tx`insert into santa_people ${tx(row)} on conflict (id) do update set name = excluded.name, position = excluded.position, receiver_id = excluded.receiver_id`;
+        }
+      } else for (const [i, name] of people.entries()) await tx`update santa_people set name = ${name}, position = ${i} where id = ${ids[i]}`;
+      const drawnAt = redrawn ? new Date() : new Date(locked.drawn_at);
+      await tx`update santa_groups set name = ${info.name}, budget = ${info.budget}, exchange_date = ${info.date}, message = ${info.message}, exclusions = ${tx.json(exclusions)}, drawn_at = ${drawnAt}, expires_at = ${expiry(info.date, drawnAt.getTime())} where id = ${g.id}`;
     });
-    return { ok: true };
+    return { ok: true, redrawn };
   }
   if (action === 'delete') {
     await db`delete from santa_groups where id = ${g.id}`;

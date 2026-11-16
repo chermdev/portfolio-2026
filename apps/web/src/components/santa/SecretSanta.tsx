@@ -8,7 +8,7 @@ import { Textarea } from '@portfolio/ui/components/textarea';
 import { Field, FieldGroup, FieldLabel, FieldDescription, FieldError } from '@portfolio/ui/components/field';
 import { Alert, AlertTitle, AlertDescription } from '@portfolio/ui/components/alert';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@portfolio/ui/components/alert-dialog';
-import { drawNames, parseNames, parseWishes, duplicateNames, santaLimits } from '@portfolio/calculators';
+import { drawNames, parseNames, parseWishes, duplicateNames, sameRoster, santaLimits } from '@portfolio/calculators';
 import { SelectField, Settings, ResultRow } from '../calculators/Fields';
 import { useSecretSantaStore, useHydrateCalculator, type SantaRoom } from '../../stores/calculators';
 import { Gift, Scene, Snowfall, Tree, Santa, Snowman, celebrate } from './Art';
@@ -87,7 +87,7 @@ function Explainer() {
 }
 
 /** The organizer's form, for a new group or to edit one (which draws everyone again). */
-function GroupForm({ draft, set, submitLabel, onSubmit, busy, error, editing }: { draft: Draft; set: <K extends keyof Draft>(key: K, value: Draft[K] | ((previous: Draft[K]) => Draft[K])) => void; submitLabel: string; onSubmit: () => void; busy: boolean; error: string; editing?: boolean }) {
+function GroupForm({ draft, set, submitLabel, onSubmit, busy, error, editing, redraw = true }: { draft: Draft; set: <K extends keyof Draft>(key: K, value: Draft[K] | ((previous: Draft[K]) => Draft[K])) => void; submitLabel: string; onSubmit: () => void; busy: boolean; error: string; editing?: boolean; redraw?: boolean }) {
   const { t } = useTranslation();
   const people = parseNames(draft.names), duplicates = [...new Set(duplicateNames(people))], long = people.find(name => name.length > santaLimits.name);
   const namesError = !draft.names.trim() ? '' : people.length < 3 ? t("Add at least 3 people.") : people.length > santaLimits.people ? t('Up to {n} people.', { n: santaLimits.people })
@@ -117,7 +117,7 @@ function GroupForm({ draft, set, submitLabel, onSubmit, busy, error, editing }: 
       </FieldGroup>}
     </Settings>
     {(impossible || error) && <Problem title={impossible ? t("No valid draw") : t("Couldn’t save")}>{impossible ? t("With these exclusions, no draw works. Remove a pair or add more people.") : error}</Problem>}
-    <Button size="lg" disabled={!ready || busy} onClick={() => { if (drawNames(people, pairs.map(pair => [pair.a, pair.b]))) setConfirming(true); else setImpossible(true); }}><GiftIcon aria-hidden="true" /> {busy ? t("Drawing names…") : submitLabel}</Button>
+    <Button size="lg" disabled={!ready || busy} onClick={() => { if (!redraw) onSubmit(); else if (drawNames(people, pairs.map(pair => [pair.a, pair.b]))) setConfirming(true); else setImpossible(true); }}>{redraw ? <GiftIcon aria-hidden="true" /> : <Check aria-hidden="true" />} {busy ? (redraw ? t("Drawing names…") : t("Saving…")) : submitLabel}</Button>
     <AlertDialog open={confirming} onOpenChange={setConfirming}>
       <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{editing ? t("Draw everyone again?") : t("Before you create it")}</AlertDialogTitle><AlertDialogDescription>{t('Check the names: {n} people.', { n: people.length })}</AlertDialogDescription></AlertDialogHeader>
         <ul className="flex list-disc flex-col gap-2 pl-5 text-sm leading-6 text-muted-foreground">
@@ -170,19 +170,21 @@ function Organizer({ admin, addRoom, removeRoom }: { admin: string; addRoom: (ro
     if (!editing) return;
     setBusy(true); setSaveError('');
     try {
-      await api({ action: 'update', admin, name: editing.group, budget: editing.budget, date: editing.date, message: editing.message, people: parseNames(editing.names), exclusions: editing.exclusions.map(pair => [pair.a, pair.b]) });
-      setEditing(null); celebrate(); await load();
+      const { redrawn } = await api<{ redrawn: boolean }>({ action: 'update', admin, name: editing.group, budget: editing.budget, date: editing.date, message: editing.message, people: parseNames(editing.names), exclusions: editing.exclusions.map(pair => [pair.a, pair.b]) });
+      setEditing(null); if (redrawn) celebrate(); await load();
     } catch (err) { setSaveError(message((err as Error).message)); } finally { setBusy(false); }
   }
+  // Same check as the server: only changing the people or exclusions draws everyone again.
+  const redraw = !!editing && !sameRoster(parseNames(editing.names), editing.exclusions.map(pair => [pair.a, pair.b]), data.people.map(person => person.name), data.exclusions);
   const setEdit: Parameters<typeof GroupForm>[0]['set'] = (key, value) => setEditing(previous => previous && ({ ...previous, [key]: typeof value === 'function' ? (value as (p: unknown) => unknown)(previous[key]) : value }));
   return <div className="tool-workspace">
     <aside className="tool-pane-inputs" aria-label={t("Details")}>
-      {editing ? <><h2 className="text-xl font-medium tracking-tight">{t("Edit and draw again")}</h2><GroupForm draft={editing} set={setEdit} submitLabel={t("Save and draw again")} onSubmit={save} busy={busy} error={saveError} editing /><Button variant="ghost" onClick={() => setEditing(null)}>{t("Cancel")}</Button></>
+      {editing ? <><div className="flex flex-col gap-2"><h2 className="text-xl font-medium tracking-tight">{t("Edit Secret Santa")}</h2><Note>{redraw ? t("You changed the people or exclusions, so saving draws everyone again.") : t("Everyone keeps who they give to. Changing the people or exclusions draws everyone again.")}</Note></div><GroupForm draft={editing} set={setEdit} submitLabel={redraw ? t("Save and draw again") : t("Save changes")} onSubmit={save} busy={busy} error={saveError} editing redraw={redraw} /><Button variant="ghost" onClick={() => setEditing(null)}>{t("Cancel")}</Button></>
         : <div className="flex flex-col gap-5">
           <div><p className="meta flex items-center gap-1.5"><Crown aria-hidden="true" size={14} /> {t("You organize")}</p><h2 className="mt-1 text-xl font-medium tracking-tight">{data.name || t("Secret Santa")}</h2></div>
           <dl><ResultRow label={t("People")} value={String(data.people.length)} />{data.budget && <ResultRow label={t("Budget")} value={data.budget} />}{data.date && <ResultRow label={t("Exchange date")} value={day(data.date, locale)} />}<ResultRow label={t("Couples and exclusions")} value={String(data.exclusions.length)} /></dl>
           {data.message && <p className="whitespace-pre-line rounded-xl border p-4 text-sm leading-6">{data.message}</p>}
-          <Button variant="outline" onClick={() => setEditing({ names: data.people.map(person => person.name).join('\n'), group: data.name, budget: data.budget, date: data.date, message: data.message, exclusions: data.exclusions.map(([a, b], i) => ({ id: i, a, b })) })}><Pencil aria-hidden="true" /> {t("Edit and draw again")}</Button>
+          <Button variant="outline" onClick={() => setEditing({ names: data.people.map(person => person.name).join('\n'), group: data.name, budget: data.budget, date: data.date, message: data.message, exclusions: data.exclusions.map(([a, b], i) => ({ id: i, a, b })) })}><Pencil aria-hidden="true" /> {t("Edit")}</Button>
           <div className="flex flex-col gap-2"><p className="text-sm font-medium">{t("Your organizer link")}</p><p className="text-xs leading-5 text-muted-foreground">{t("Keep it private: it manages the group. It is saved in this browser; copy it to organize from another device.")}</p><ShareLink url={link(`a=${admin}`)} label={t("Copy organizer link")} /></div>
           <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" className="justify-start text-destructive"><Trash2 aria-hidden="true" /> {t("Delete Secret Santa")}</Button></AlertDialogTrigger>
             <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{t("Delete this Secret Santa?")}</AlertDialogTitle><AlertDialogDescription>{t("Everyone loses access, and the names and wish lists are deleted. This can’t be undone.")}</AlertDialogDescription></AlertDialogHeader>
