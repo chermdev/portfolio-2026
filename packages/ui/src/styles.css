@@ -147,6 +147,11 @@
   button, a, input, select, summary { -webkit-tap-highlight-color: transparent; }
   button, [role=button] { cursor: pointer; }
   button:disabled { cursor: not-allowed; }
+  /* iOS Safari sizes date fields to their content and ignores width: 100%, so they spill out of narrow forms. */
+  @supports (-webkit-touch-callout: none) {
+    input[type="date"] { -webkit-appearance: none; appearance: none; display: block; min-width: 0; }
+    input[type="date"]::-webkit-date-and-time-value { text-align: start; }
+  }
   :focus-visible { outline: 2px solid var(--ring); outline-offset: 5px; }
   ::selection { background: var(--accent); color: var(--accent-foreground); }
   h1, h2, h3, p { text-wrap: pretty; }
@@ -303,8 +308,9 @@ html[data-input=keyboard] [data-slot=button]:active { transform: none !important
 
 /* Trees, snowflakes, and stars used as a mask by the festive pattern and the Secret Santa app icon. */
 :root { --festive-motif: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M24 14v20M14 24h20M17 17l14 14M31 17L17 31'/%3E%3Cpath d='M86 74v18M77 83h18M80 77l12 12M92 77L80 89'/%3E%3C/g%3E%3Cpath d='M84 8l13 22h-7l10 16H68l10-16h-7z M82 46h4v6h-4z' fill='black'/%3E%3Cpath d='M30 74l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z' fill='black'/%3E%3Ccircle cx='60' cy='60' r='2.5' fill='black'/%3E%3Ccircle cx='108' cy='108' r='2' fill='black'/%3E%3Ccircle cx='8' cy='104' r='2' fill='black'/%3E%3C/svg%3E"); }
-/* Festive theme: opt-in per tool with `.festive` (Secret Santa). Tokens are scoped so the rest of the site keeps its palette. */
-.festive {
+/* Festive theme: opt-in per tool with `.festive` (Secret Santa); `.festive-page` also patterns the page behind it.
+   Tokens are scoped so the rest of the site keeps its palette. */
+.festive, body:has(.festive-page) {
   --festive-red: #c62f3a;
   --festive-green: #1f7a4d;
   --festive-gold: #e5a823;
@@ -313,7 +319,7 @@ html[data-input=keyboard] [data-slot=button]:active { transform: none !important
   --festive-ink: #3a2a24;
   --festive-pattern: color-mix(in oklab, var(--festive-green) 11%, transparent);
 }
-.dark .festive {
+.dark .festive, .dark body:has(.festive-page) {
   --festive-red: #e2525c;
   --festive-green: #3fa872;
   --festive-gold: #f0bf4c;
@@ -321,11 +327,15 @@ html[data-input=keyboard] [data-slot=button]:active { transform: none !important
   --festive-pattern: color-mix(in oklab, var(--festive-snow) 7%, transparent);
 }
 @layer components {
-  /* A repeating tile of trees, snowflakes, and stars behind the page, tinted by --festive-pattern. */
-  .festive-pattern::before {
-    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: var(--festive-pattern);
+  /* A repeating tile of trees, snowflakes, and stars, tinted by --festive-pattern: behind a positioned element
+     (.festive-pattern), or behind the whole page (.festive-page), scrolling with it. */
+  body:has(.festive-page) { position: relative; isolation: isolate; }
+  .festive-pattern::before, body:has(.festive-page)::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: var(--festive-pattern);
     mask: var(--festive-motif) 0 0 / 120px 120px repeat;
   }
+  /* The tool window stays solid so the pattern reads as page background, not through the form. */
+  .festive-page .tool-workspace { background-color: color-mix(in oklab, var(--secondary) 40%, var(--background)); }
   /* Snow that falls behind the content; each flake's position and timing are set inline. */
   .snowfall { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
   .snowfall > span { position: absolute; top: -1rem; border-radius: 9999px; background: var(--festive-snow); box-shadow: 0 0 0 1px color-mix(in oklab, var(--festive-green) 18%, transparent); animation: festive-fall linear infinite; }

@@ -14,7 +14,7 @@ const tool = tools.find(item => Astro.url.pathname.includes(`/tools/${item.slug}
 ---
 <Layout title={seoTitle ?? title} description={description} image={image} schema={{ '@context': 'https://schema.org', '@type': 'WebApplication', name: title, description, url: new URL(Astro.url.pathname, site.url).href, inLanguage: localeFromPath(Astro.url.pathname), applicationCategory: kind, operatingSystem: 'Any', browserRequirements: 'Requires JavaScript', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }, author: { '@type': 'Person', name: 'chermdev', url: site.github } }}>
   {app ? <>
-    <div class:list={["tool-app", festive && "festive festive-pattern"]}>
+    <div class:list={["tool-app", festive && "festive festive-page"]}>
       <div class="tool-toolbar">
         <div class="tool-heading flex min-w-[min(100%,16rem)] flex-1 items-center gap-3">{tool && <AppIcon icon={tool.icon} small />}
         <div class="min-w-0"><h1 class="font-medium leading-snug tracking-tight sm:truncate">{title}</h1><nav aria-label="Breadcrumb" class="meta flex min-w-0 flex-wrap items-center gap-x-2"><a class="-my-2 inline-block whitespace-nowrap py-2 hover:text-foreground hover:underline underline-offset-4" href="/tools">Tools</a><span aria-hidden="true">/</span><span class="whitespace-nowrap">{category}</span></nav>{checked && <p class="meta hidden lg:block">{checked}</p>}</div></div>

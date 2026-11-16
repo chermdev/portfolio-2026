@@ -104,7 +104,7 @@ function GroupForm({ draft, set, submitLabel, onSubmit, busy, error, editing, re
   return <FieldGroup>
     <TextField label={t("Participants")} hint={t("One name per line, the way each person should see it. At least 3.")} error={namesError}>{(id, describedBy) => <Textarea id={id} rows={7} value={draft.names} onChange={event => { set('names', event.target.value); setImpossible(false); }} placeholder={'Ana\nLuis\nCarlos\nMaría'} aria-invalid={!!namesError} aria-describedby={describedBy} />}</TextField>
     <TextField label={t("Event name")} hint={t("Optional. Everyone sees it.")}>{(id, describedBy) => <Input id={id} value={draft.group} maxLength={santaLimits.group} onChange={event => set('group', event.target.value)} placeholder={t("Family Christmas")} aria-describedby={describedBy} />}</TextField>
-    <div className="grid items-start gap-5 sm:grid-cols-2 lg:grid-cols-1">
+    <div className="grid grid-cols-1 items-start gap-5 sm:grid-cols-2 lg:grid-cols-1">
       <TextField label={t("Budget")} hint={t("Optional. Include the currency.")}>{(id, describedBy) => <Input id={id} value={draft.budget} maxLength={santaLimits.budget} onChange={event => set('budget', event.target.value)} placeholder={t("$500 MXN")} aria-describedby={describedBy} />}</TextField>
       <TextField label={t("Exchange date")} hint={t("Optional.")}>{(id, describedBy) => <Input id={id} type="date" min="2000-01-01" max="2100-12-31" value={draft.date} onChange={event => set('date', event.target.value)} aria-describedby={describedBy} />}</TextField>
     </div>
