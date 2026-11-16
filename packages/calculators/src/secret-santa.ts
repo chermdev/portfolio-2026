@@ -41,13 +41,13 @@ export function drawNames(names: string[], exclusions: [string, string][] = [], 
     if (valid(order)) return order.map(index => names[index]);
   }
   // Many exclusions: search for any valid draw, giving the most constrained person a receiver first.
-  // ponytail: not uniform, and capped at 200k steps; only reached when 5000 shuffles fail.
+  // ponytail: not uniform, and capped by total work (about n² per step) so a crafted exclusion list can't pin the CPU; only reached when 5000 shuffles fail.
   const receiverOf: number[] = Array(n).fill(-1), taken: boolean[] = Array(n).fill(false);
   const options = [...names.keys()].map(giver => shuffle([...names.keys()].filter(receiver => allowed(giver, receiver))));
   let steps = 0;
   const search = (assigned: number): boolean => {
     if (assigned === n) return true;
-    if (++steps > 200_000) return false;
+    if ((steps += n * n) > 20_000_000) return false;
     let giver = -1, fewest = Infinity;
     for (let g = 0; g < n; g++) if (receiverOf[g] === -1) {
       const count = options[g].filter(r => !taken[r] && receiverOf[r] !== g).length;
